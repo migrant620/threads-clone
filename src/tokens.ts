@@ -14,7 +14,7 @@ export const frame = {
 };
 
 export const colors = {
-  page: '#FCFCFC',
+  page: '#FFFFFF',
   surface: '#FFFFFF',
   ink: '#000000',
   secondary: '#989898',
