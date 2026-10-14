@@ -209,6 +209,6 @@ const styles = StyleSheet.create({
   cardFollowOn: { backgroundColor: colors.page, borderWidth: 1, borderColor: colors.border },
   cardFollowText: { fontSize: 15, fontWeight: weight.semibold, letterSpacing: 0, color: colors.onDark, fontFamily: 'ThreadsBody' },
   cardFollowTextOn: { color: colors.ink },
-  tabRun: { color: colors.tertiary, fontFamily: 'ThreadsBody' },
+  tabRun: { color: colors.tertiary, fontFamily: 'ThreadsBody', lineHeight: 17.5 },
   emptyRun: { position: 'absolute', letterSpacing: tracking.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
 });
