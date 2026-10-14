@@ -208,7 +208,6 @@ export const ThreadDetail: React.FC<Props> = ({ now, root, replies, liked, onTog
       />
 
       <Hairline y={T3.hairline[0]} />
-      <View style={[abs(T3.trendChip), styles.trendChip]} />
       <Text numberOfLines={1} style={[styles.trendingRun, { left: T3.trending.x, top: T3.trending.y, width: T3.trending.w }]}>
         Trending · Trail survey results · {formatCount(6000)} posts
       </Text>
