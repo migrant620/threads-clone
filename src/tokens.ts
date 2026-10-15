@@ -22,6 +22,7 @@ export const colors = {
   navIdle: '#A8A8A8',
   surfaceAlt: '#F4F4F4',
   hairline: '#ECECEC',
+  hairlineStrong: '#D9D9D9',
   border: '#D4D4D4',
   field: '#F4F4F4',
   disabled: '#E8E8E8',

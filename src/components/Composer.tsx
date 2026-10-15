@@ -53,6 +53,8 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
         ]}
       />
 
+      <View style={styles.headerRule} pointerEvents="none" />
+
       {multi ? <View style={[styles.segmentConnector, { top: 56, height: SEG_ROWS[segments.length - 1].handleTop - 32 }]} /> : null}
 
       {segments.map((text, i) => {
@@ -204,6 +206,7 @@ const DEVICE_PX = 0.36;
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page, width: frame.width, height: frame.height },
+  headerRule: { position: 'absolute', left: 0, right: 0, top: 56, height: 1, backgroundColor: colors.hairlineStrong },
   segmentConnector: { position: 'absolute', left: space.avatarLeft + 23, width: connector.width, backgroundColor: colors.border, borderRadius: 1 },
 
   handleKey: { position: 'absolute', left: 60, width: 55.7, height: 48, justifyContent: 'center' },

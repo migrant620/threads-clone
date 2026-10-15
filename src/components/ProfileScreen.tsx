@@ -157,6 +157,8 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
             );
           })}
 
+          <View style={styles.tabRule} pointerEvents="none" />
+
           <Text
             style={[
               styles.emptyRun,
@@ -211,4 +213,5 @@ const styles = StyleSheet.create({
   cardFollowTextOn: { color: colors.ink },
   tabRun: { color: colors.tertiary, fontFamily: 'ThreadsBody', lineHeight: 17.5 },
   emptyRun: { position: 'absolute', letterSpacing: tracking.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  tabRule: { position: 'absolute', left: 0, right: 0, top: 576.8, height: 1, backgroundColor: colors.hairlineStrong },
 });
