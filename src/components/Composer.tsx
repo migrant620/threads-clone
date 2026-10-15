@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   postOptionsText: { fontSize: type.body, fontWeight: weight.medium, color: colors.secondary, fontFamily: 'ThreadsBody' },
   countPicker: { position: 'absolute', left: 234.7, top: 0, width: 66.2, height: 48, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 4 },
   countThumb: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.pickerGrey },
-  postKey: { position: 'absolute', left: 316.7, top: 4, width: 64, height: 40, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  postKey: { position: 'absolute', left: 316.7, top: 4, width: 64, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   postKeyText: { fontSize: type.body, fontWeight: weight.medium, fontFamily: 'ThreadsBody' },
 
   scrim: { position: 'absolute', left: 0, top: 0, width: frame.width, height: frame.height, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 100 },
