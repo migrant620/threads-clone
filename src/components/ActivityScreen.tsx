@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
 
   chip: { position: 'absolute', top: 64, height: 33.2, borderRadius: 16.6, alignItems: 'center', justifyContent: 'center' },
   chipOn: { backgroundColor: colors.chip },
-  chipOff: { borderWidth: 1, borderColor: colors.hairline },
+  chipOff: { borderWidth: 1, borderColor: colors.hairlineStrong },
   chipRun: { fontSize: 15, lineHeight: 17.5, letterSpacing: 0, fontWeight: weight.medium, color: colors.ink, fontFamily: 'ThreadsBody' },
 
   sectionLabel: { position: 'absolute', left: 16, top: 115.7, fontSize: 15, lineHeight: 17.5, letterSpacing: 0, fontWeight: weight.medium, color: colors.ink, fontFamily: 'ThreadsBody' },
