@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
 
   trendTitle: { position: 'absolute', left: 16, lineHeight: 18.3, fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
   trendSummary: { position: 'absolute', left: 16, lineHeight: 18.3, fontSize: type.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
-  thumb: { position: 'absolute', left: 322.8, width: 54.2, height: 64, borderRadius: 8, overflow: 'hidden', backgroundColor: colors.surfaceAlt },
+  thumb: { position: 'absolute', left: 322.8, width: 54.2, height: 64, borderRadius: 12, overflow: 'hidden', backgroundColor: colors.surfaceAlt },
   thumbImage: { width: '100%', height: '100%' },
 
   trendRule: { position: 'absolute', left: 12, right: 0, top: -13.5, height: 1, backgroundColor: colors.hairlineStrong },
