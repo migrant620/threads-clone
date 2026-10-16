@@ -10,12 +10,13 @@ import { ActivityScreen } from './components/ActivityScreen';
 import { ProfileScreen } from './components/ProfileScreen';
 import { MessagesScreen } from './components/MessagesScreen';
 import { LoginScreen } from './components/LoginScreen';
+import { SettingsScreen } from './components/SettingsScreen';
 import { buildFeed, buildThread } from './data';
 import { colors, frame } from './tokens';
 import { useVariableWeightFont } from './webfont';
 
 
-type Screen = 'login' | 'feed' | 'post' | 'create' | 'search' | 'activity' | 'profile' | 'messages';
+type Screen = 'login' | 'feed' | 'post' | 'create' | 'search' | 'activity' | 'profile' | 'messages' | 'settings';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -73,6 +74,7 @@ export default function App() {
     if (key === 'activity') return setScreen('activity');
     if (key === 'profile') return setScreen('profile');
     if (key === 'search') return setScreen('search');
+    if (key === 'settings') return setScreen('settings');
     return setScreen('login');
   };
 
@@ -127,6 +129,7 @@ export default function App() {
         {screen === 'search' ? <SearchScreen query={query} onQuery={setQuery} onBack={backToFeed} onNavigate={onNavigate} followed={followed} onToggleFollow={toggleFollow} /> : null}
         {screen === 'activity' ? <ActivityScreen now={now} onNavigate={onNavigate} /> : null}
         {screen === 'profile' ? <ProfileScreen onNavigate={onNavigate} followed={followed} onToggleFollow={toggleFollow} /> : null}
+        {screen === 'settings' ? <SettingsScreen onBack={() => setScreen('profile')} /> : null}
         {screen === 'messages' ? <MessagesScreen onNavigate={onNavigate} /> : null}
       </View>
 
