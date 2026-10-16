@@ -35,13 +35,13 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
         <Pressable accessibilityRole="button" accessibilityLabel="Insights" style={[styles.topKey, { left: 4 }]}>
           <InsightsIcon size={iconSize.topBar} />
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="Search" style={[styles.topKey, { left: 244.9 }]}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Search" onPress={() => onNavigate('search')} style={[styles.topKey, { left: 244.9 }]}>
           <SearchIcon size={iconSize.topBar} />
         </Pressable>
         <Pressable accessibilityRole="button" accessibilityLabel="Instagram" style={[styles.topKey, { left: 292.93 }]}>
           <InstagramMark size={iconSize.topBar} color={colors.ink} />
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="Settings" style={[styles.topKey, { left: 340.96 }]}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Settings" onPress={() => onNavigate('settings')} style={[styles.topKey, { left: 340.96 }]}>
           <SettingsIcon size={iconSize.topBar} />
         </Pressable>
       </View>
@@ -188,7 +188,7 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
 };
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.page, width: frame.width, height: frame.height },
+  screen: { flex: 1, backgroundColor: '#F5F5F5', width: frame.width, height: frame.height },
   topBar: { position: 'absolute', left: 0, top: 0, width: frame.width, height: 56, zIndex: 20 },
   topIcon: { position: 'absolute', left: 0, top: 0, width: frame.width, height: 56 },
   topKey: { position: 'absolute', top: 4, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
