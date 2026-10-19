@@ -33,7 +33,7 @@ const RESULT_ROWS: Array<{ handle: number; avatar: number; name: number | null; 
   { handle: 528.4, avatar: 529.1, name: 548.0, handleInk: '#EFEFEF', nameInk: '#44474F' },
   { handle: 578.6, avatar: 579.3, name: 598.2, handleInk: '#EFEFEF', nameInk: '#1B1B1F' },
   { handle: 628.8, avatar: 629.5, name: 648.4, handleInk: '#EFEFEF', nameInk: '#EFEFEF' },
-  { handle: 677.6, avatar: 679.7, name: 697.2, badge: 163.4, handleInk: '#1B1B1F' },
+  { handle: 677.6, avatar: 679.7, name: 697.2, nameDy: 1.7, badge: 163.4, handleInk: '#1B1B1F' },
 ];
 
 export const SearchScreen: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed, onToggleFollow }) => {
@@ -53,7 +53,7 @@ const Landing: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed
       onLeft={onBack}
       leftGeo={{ left: 0, top: 8.4, width: 60 }}
       title="Search"
-      titleGeo={{ left: 60, top: 13.5, height: 37.5, fontSize: 30.9, lineHeight: 37.5 }}
+      titleGeo={{ left: 60, top: 14.25, height: 37.5, fontSize: 30.9, lineHeight: 37.5, letterSpacing: -0.53 }}
       right={[]}
     />
 
@@ -83,7 +83,7 @@ const Landing: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed
             <Text style={[styles.trendTitle, { top: 0 }]} numberOfLines={1}>
               {t.topic}
             </Text>
-            <Text style={[styles.trendSummary, { top: 21.4, width: t.thumb ? 294.8 : 361 }]} numberOfLines={2}>
+            <Text style={[styles.trendSummary, { top: 23.05, width: t.thumb ? 294.8 : 361 }]} numberOfLines={2}>
               {t.summary}
             </Text>
             {t.thumb || i === 0 ? (
@@ -142,7 +142,7 @@ const SuggestionRow: React.FC<{ s: (typeof suggestions)[number]; followed: boole
       </View>
     ) : null}
     <Text style={[styles.suggestionName, { left: 68, top: 707.3 }]} numberOfLines={1}>
-      {s.bio}
+      {s.name}
     </Text>
     <Pressable
       accessibilityRole="button"
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   sectionRule: { position: 'absolute', left: 0, right: 0, top: 639.7, height: 1, backgroundColor: colors.hairlineStrong },
 
   showMoreKey: { position: 'absolute', left: 16, top: 602.2, height: 17.5, justifyContent: 'center' },
-  showMoreRun: { lineHeight: 17.5, fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
+  showMoreRun: { lineHeight: 17.5, fontSize: type.body, fontWeight: weight.semibold, letterSpacing: -0.2, color: colors.ink, fontFamily: 'ThreadsBody' },
   showMoreChevron: { position: 'absolute', left: 93.9, top: 605.4, width: 11, height: 11, alignItems: 'center', justifyContent: 'center' },
 
   suggestionCaption: { position: 'absolute', left: 16, top: 656.1, lineHeight: 17.5, fontSize: type.body, fontWeight: weight.strong, color: colors.secondary, fontFamily: 'ThreadsBody' },

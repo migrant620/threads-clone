@@ -7,6 +7,7 @@ import { colors, frame, tracking, weight } from '../tokens';
 
 type Props = {
   onNavigate: (key: string) => void;
+  onRequestNotifications: () => void;
 };
 
 const CHIP_TOP = 110.3;
@@ -14,12 +15,12 @@ const CHIP_H = 33.5;
 const CHIP_RADIUS = 16.75;
 const CHIP_INK = 'rgb(217,217,217)';
 
-export const MessagesScreen: React.FC<Props> = ({ onNavigate }) => (
+export const MessagesScreen: React.FC<Props> = ({ onNavigate, onRequestNotifications }) => (
   <View style={styles.screen}>
     <TopBar
       left="none"
       title="Messages"
-      titleGeo={{ left: 16, top: 9.5, height: 37.5, fontSize: 32, lineHeight: 37.5, letterSpacing: -1.05 }}
+      titleGeo={{ left: 16, top: 9.5, height: 37.5, fontSize: 32, lineHeight: 37.5, letterSpacing: -1.14 }}
       right={[]}
     />
 
@@ -59,7 +60,7 @@ export const MessagesScreen: React.FC<Props> = ({ onNavigate }) => (
         pointerEvents="none"
         style={styles.filterKey}
       >
-        <FiltersIcon size={15} color={colors.ink} />
+        <FiltersIcon size={15} color="#060606" />
       </View>
     </Pressable>
 
@@ -85,7 +86,7 @@ export const MessagesScreen: React.FC<Props> = ({ onNavigate }) => (
     <Text style={styles.emptyTitle}>Everything lands here</Text>
     <Text style={styles.emptyBody}>Turn on alerts so your replies land here.</Text>
 
-    <Pressable accessibilityRole="button" accessibilityLabel="Enable notifications" style={styles.cta}>
+    <Pressable accessibilityRole="button" accessibilityLabel="Enable notifications" onPress={onRequestNotifications} style={styles.cta}>
       <Text style={styles.ctaRun}>Enable notifications</Text>
     </Pressable>
 

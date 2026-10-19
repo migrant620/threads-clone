@@ -9,12 +9,14 @@ import { relativeTime } from '../data';
 type Props = {
   now: number;
   onNavigate: (key: string) => void;
+  notificationsOn: boolean;
+  onRequestNotifications: () => void;
 };
 
-const CATEGORIES: Array<{ label: string; left: number; width: number }> = [
+const CATEGORIES: Array<{ label: string; left: number; width: number; trk?: number }> = [
   { label: 'All', left: 14.2, width: 50.2 },
-  { label: 'Follows', left: 71.0, width: 84.6 },
-  { label: 'Conversations', left: 162.5, width: 131.0 },
+  { label: 'Follows', left: 71.0, width: 84.6, trk: 0.086 },
+  { label: 'Conversations', left: 162.5, width: 131.0, trk: -0.07 },
   { label: 'Mentions', left: 300.4, width: 96.7 },
 ];
 
@@ -36,8 +38,9 @@ const RowHairline: React.FC<{ top: number }> = ({ top }) => (
   <View style={[styles.rowHairline, { top }]} />
 );
 
-export const ActivityScreen: React.FC<Props> = ({ now, onNavigate }) => {
+export const ActivityScreen: React.FC<Props> = ({ now, onNavigate, notificationsOn, onRequestNotifications }) => {
   const [tab, setTab] = React.useState('All');
+  const [footerDismissed, setFooterDismissed] = React.useState(false);
   const bannerAge = relativeTime(now - ROW_AGE_MS[0], now);
 
   return (
@@ -45,8 +48,9 @@ export const ActivityScreen: React.FC<Props> = ({ now, onNavigate }) => {
       <TopBar
         left="none"
         title="Activity"
-        titleGeo={{ left: 16, top: 13.5, height: 37.5, fontSize: 28.9, lineHeight: 37.5 }}
+        titleGeo={{ left: 16, top: 13.5, height: 37.5, fontSize: 28.9, lineHeight: 37.5, letterSpacing: -0.21 }}
         right={[{ key: 'bell', label: 'Enable notifications', left: 121.2, top: 8, width: 48 }]}
+        onRight={onRequestNotifications}
       />
 
       {CATEGORIES.map((c) => {
@@ -63,7 +67,7 @@ export const ActivityScreen: React.FC<Props> = ({ now, onNavigate }) => {
               on ? styles.chipOn : styles.chipOff,
             ]}
           >
-            <Text style={styles.chipRun}>{c.label}</Text>
+            <Text style={[styles.chipRun, c.trk === undefined ? null : { letterSpacing: c.trk }]}>{c.label}</Text>
           </Pressable>
         );
       })}
@@ -99,24 +103,26 @@ export const ActivityScreen: React.FC<Props> = ({ now, onNavigate }) => {
                 <MoreIcon size={16} color={colors.overflowInk} />
               </Pressable>
             </Pressable>
-            <Text style={[styles.body, { top: rowTop + 29.2 }]}>{BODY[i]}</Text>
+            <Text style={[styles.body, { top: rowTop + 30.75 }]}>{BODY[i]}</Text>
             {i === 0 ? <RowHairline top={rowTop + 82.6} /> : null}
           </React.Fragment>
         );
       })}
 
+      {notificationsOn || footerDismissed ? null : (
       <View style={styles.footer}>
         <View style={styles.footerGlyph}>
           <BellIcon size={14.6} color={colors.secondary} />
         </View>
         <Text style={styles.footerRun}>Notifications are paused.</Text>
-        <Pressable accessibilityRole="button" accessibilityLabel="Turn on" style={styles.turnOnKey}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Turn on" onPress={onRequestNotifications} style={styles.turnOnKey}>
           <Text style={styles.turnOnRun}>Turn on</Text>
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="" style={styles.dismissKey}>
+        <Pressable accessibilityRole="button" accessibilityLabel="" onPress={() => setFooterDismissed(true)} style={styles.dismissKey}>
           <CloseIcon size={22} color={colors.ink} />
         </Pressable>
       </View>
+      )}
 
       <BottomNav current="activity" onSelect={onNavigate} unread={false} />
     </View>
@@ -145,7 +151,7 @@ const styles = StyleSheet.create({
 
   authorRun: { position: 'absolute', left: 68, width: 89.9, height: 19.0 },
   handle: { position: 'absolute', left: 0, top: 1.1, lineHeight: 17.5, fontSize: 15, letterSpacing: tracking.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
-  badgeBox: { position: 'absolute', left: 53.9, top: 1.1 },
+  badgeBox: { position: 'absolute', left: 53.9, top: 2.15 },
   timeRun: { position: 'absolute', left: 73.3, top: 1.1, lineHeight: 17.5, fontSize: 15, letterSpacing: tracking.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
 
   overflowPlate: { position: 'absolute', left: 345, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
@@ -155,6 +161,6 @@ const styles = StyleSheet.create({
   footerGlyph: { position: 'absolute', left: 76.1, top: 16.4 },
   footerRun: { position: 'absolute', left: 97.2, top: 17.1, fontSize: 13.3, lineHeight: 14.2, letterSpacing: tracking.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
   turnOnKey: { position: 'absolute', left: 247.8, top: 0.4, width: 48, height: 47.7, alignItems: 'center', justifyContent: 'center' },
-  turnOnRun: { fontSize: 13.3, lineHeight: 17.5, letterSpacing: tracking.body, fontWeight: weight.bold, color: colors.ink, fontFamily: 'ThreadsBody' },
+  turnOnRun: { marginTop: 1.5, fontSize: 13.3, lineHeight: 17.5, letterSpacing: -0.03, fontWeight: weight.bold, color: colors.ink, fontFamily: 'ThreadsBody' },
   dismissKey: { position: 'absolute', left: 341, top: 0, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
 });
