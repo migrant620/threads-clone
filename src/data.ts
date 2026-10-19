@@ -34,6 +34,7 @@ export type ReplyNode = {
 export type Suggestion = {
   id: string;
   handle: string;
+  name: string;
   avatar: ImageSourcePropType;
   verified: boolean;
   bio: string;
@@ -177,10 +178,23 @@ export const buildThread = (now: number): { root: Post; replies: ReplyNode[] } =
 });
 
 export const suggestions: Suggestion[] = [
-  { id: 's1', handle: 'harborline', avatar: a(2), verified: true, bio: 'Coastal path notes and trail surveys.', followers: '18.4K' },
-  { id: 's2', handle: 'quietmiles', avatar: a(3), verified: false, bio: 'Walking, mostly. Occasionally maps.', followers: '1,204' },
-  { id: 's3', handle: 'cafehours', avatar: a(4), verified: false, bio: 'A small room with good light.', followers: '742' },
-  { id: 's4', handle: 'keyboardnotes', avatar: a(5), verified: false, bio: 'Keyboards, switches, and quiet desks.', followers: '5,318' },
+  { id: 's1', handle: 'harborline', name: 'Harbor Line', avatar: a(2), verified: true, bio: 'Coastal path notes and trail surveys.', followers: '18.4K' },
+  { id: 's2', handle: 'quietmiles', name: 'Quiet Miles', avatar: a(3), verified: false, bio: 'Walking, mostly. Occasionally maps.', followers: '1,204' },
+  { id: 's3', handle: 'cafehours', name: 'Cafe Hours', avatar: a(4), verified: false, bio: 'A small room with good light.', followers: '742' },
+  { id: 's4', handle: 'keyboardnotes', name: 'Keyboard Notes', avatar: a(5), verified: false, bio: 'Keyboards, switches, and quiet desks.', followers: '5,318' },
+];
+
+export const onboardingSuggestions: Array<{ handle: string; avatar: ImageSourcePropType; followers: string }> = [
+  { handle: 'harborline', avatar: a(2), followers: '18.4K' },
+  { handle: 'quietmiles', avatar: a(3), followers: '1,204' },
+  { handle: 'cafehours', avatar: a(4), followers: '742' },
+  { handle: 'keyboardnotes', avatar: a(5), followers: '5,318' },
+  { handle: 'northpier', avatar: a(2), followers: '31.2K' },
+  { handle: 'tidewatch', avatar: a(1), followers: '2,077' },
+  { handle: 'quayside', avatar: a(3), followers: '64.9K' },
+  { handle: 'saltmarsh_', avatar: a(4), followers: '9,410' },
+  { handle: 'harbournotes', avatar: a(5), followers: '12.6K' },
+  { handle: 'lowwater', avatar: a(4), followers: '3,385' },
 ];
 
 export type Trend = {

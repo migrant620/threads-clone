@@ -34,8 +34,10 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
 
   const requestClose = () => (anyText ? setConfirming(true) : onClose());
 
-  const lastHintTop = SEG_ROWS[segments.length - 1].hintTop;
-  const attachTop = (anyText && !multi ? 119.4 : lastHintTop + (anyText ? 23.7 : 23.6));
+  const emptySingle = !multi && !anyText;
+  const hintTopFor = (i: number) => (emptySingle && i === 0 ? 95.0 : SEG_ROWS[i].hintTop);
+  const lastHintTop = hintTopFor(segments.length - 1);
+  const attachTop = (anyText && !multi ? 119.4 : emptySingle ? 118.6 : lastHintTop + (anyText ? 23.7 : 23.6));
   const addTop = attachTop + 56;
   const fieldHeight = multi ? 40.4 : 38.9;
 
@@ -46,7 +48,7 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
         onLeft={requestClose}
         cancelWidth={60}
         title="New thread"
-        titleGeo={{ top: 16.4, height: 23.3, fontSize: 19.3, lineHeight: 23.3, fontWeight: weight.semibold }}
+        titleGeo={{ top: 17.05, height: 23.3, fontSize: 19.3, lineHeight: 23.3, letterSpacing: -0.21, fontWeight: weight.semibold }}
         right={[
           { key: 'drafts', left: 292.9 },
           { key: 'more', left: 341 },
@@ -85,7 +87,7 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="What's new?"
-              style={[styles.fieldBox, { top: row.hintTop, height: multi ? row.fieldH : 17.5 }]}
+              style={[styles.fieldBox, { top: hintTopFor(i), height: multi ? row.fieldH : 17.5 }]}
             >
               <TextInput
                 accessibilityLabel="Thread text"
@@ -93,7 +95,7 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
                 value={text}
                 onChangeText={(v) => onChange(segments.map((s, j) => (j === i ? v : s)))}
                 multiline
-                style={[styles.field, { top: row.fieldTop - row.hintTop, height: fieldHeight }]}
+                style={[styles.field, { top: row.fieldTop - hintTopFor(i), height: fieldHeight }]}
               />
               {empty ? (
                 <Text style={styles.hint} pointerEvents="none">
@@ -251,7 +253,7 @@ const styles = StyleSheet.create({
   countPicker: { position: 'absolute', left: 234.7, top: 0, width: 66.2, height: 48, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 4 },
   countThumb: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.pickerGrey },
   postKey: { position: 'absolute', left: 316.7, top: 4, width: 64, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  postKeyText: { fontSize: type.body, fontWeight: weight.medium, fontFamily: 'ThreadsBody' },
+  postKeyText: { fontSize: type.body, fontWeight: weight.medium, letterSpacing: 0.12, fontFamily: 'ThreadsBody' },
 
   scrim: { position: 'absolute', left: 0, top: 0, width: frame.width, height: frame.height, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 100 },
   dialogCard: { position: 'absolute', left: 81.511, top: 298.753, width: 229.978, height: 180.51, borderRadius: 14, backgroundColor: colors.dialog },

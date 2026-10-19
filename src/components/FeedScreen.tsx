@@ -144,8 +144,8 @@ const ComposerEntry: React.FC<{ onPress: () => void }> = ({ onPress }) => (
     <View style={{ position: 'absolute', left: space.avatarLeft, top: 54.1 }}>
       <Avatar source={require('../../assets/images/a01.webp')} label="m620ui profile photo" />
     </View>
-    <Text accessibilityLabel="m620ui" style={[styles.composerHandle, { top: 58.5 }]}>m620ui</Text>
-    <Text style={[styles.composerPrompt, { top: 80 }]}>What&apos;s new?</Text>
+    <Text accessibilityLabel="m620ui" style={[styles.composerHandle, { top: 57.85 }]}>m620ui</Text>
+    <Text style={[styles.composerPrompt, { top: 79.35 }]}>What&apos;s new?</Text>
   </Pressable>
 );
 
@@ -192,7 +192,7 @@ export const PostCard: React.FC<{
     ) : (
       <View style={{ height: rhythm.post.bodyToActions }} />
     )}
-    <Pressable accessibilityRole="button" accessibilityLabel="" style={styles.actionPlate}>
+    <Pressable accessibilityRole="button" accessibilityLabel="" style={[styles.actionPlate, post.photo ? { marginTop: 0.5 } : null]}>
       <View style={styles.actionInset}>
         <ActionRow
           likes={post.likes + (liked ? 1 : 0)}
@@ -207,7 +207,7 @@ export const PostCard: React.FC<{
         />
       </View>
     </Pressable>
-    <View style={{ height: rhythm.post.actionsToHairline }} />
+    <View style={{ height: rhythm.post.actionsToHairline - (post.photo ? 0.5 : 0) }} />
     <View style={styles.separator} />
   </View>
 );
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   scroller: { flex: 1 },
   pullRow: { position: 'absolute', left: 0, width: frame.width, height: 24, alignItems: 'center', justifyContent: 'center', zIndex: 30 },
   spinner: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: colors.disabled, borderTopColor: colors.secondary },
-  composerHandle: { position: 'absolute', left: space.gutter, fontSize: type.body, fontWeight: weight.medium, color: colors.ink, letterSpacing: -0.35, fontFamily: 'ThreadsBody' },
+  composerHandle: { position: 'absolute', left: space.gutter, fontSize: type.body, fontWeight: weight.medium, color: colors.ink, letterSpacing: -0.27, fontFamily: 'ThreadsBody' },
   composerPrompt: { position: 'absolute', left: space.gutter, width: 332.7, fontSize: type.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
   bodyBox: { marginLeft: space.gutter, width: 320.7 },
   bodyLift: { marginTop: -4.5 },

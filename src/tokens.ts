@@ -46,6 +46,7 @@ export const colors = {
   pickerGrey: '#B3B3B3',
   navPlate: '#F5F5F5',
   footer: '#FAFAFA',
+  field: '#F5F5F5',
 };
 
 export const type = {

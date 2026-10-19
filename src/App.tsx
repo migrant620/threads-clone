@@ -11,12 +11,14 @@ import { ProfileScreen } from './components/ProfileScreen';
 import { MessagesScreen } from './components/MessagesScreen';
 import { LoginScreen } from './components/LoginScreen';
 import { SettingsScreen } from './components/SettingsScreen';
+import { FollowSuggestionsScreen } from './components/FollowSuggestionsScreen';
+import { NotificationPrompt } from './components/NotificationPrompt';
 import { buildFeed, buildThread } from './data';
 import { colors, frame } from './tokens';
 import { useVariableWeightFont } from './webfont';
 
 
-type Screen = 'login' | 'feed' | 'post' | 'create' | 'search' | 'activity' | 'profile' | 'messages' | 'settings';
+type Screen = 'login' | 'suggestions' | 'feed' | 'post' | 'create' | 'search' | 'activity' | 'profile' | 'messages' | 'settings';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -35,6 +37,9 @@ export default function App() {
   const [query, setQuery] = React.useState('');
   const [audience, setAudience] = React.useState('Community or topic');
   const [posted, setPosted] = React.useState(false);
+  const [askNotifications, setAskNotifications] = React.useState(false);
+  const [notificationsOn, setNotificationsOn] = React.useState(false);
+  const requestNotifications = React.useCallback(() => setAskNotifications(true), []);
   const feedScroll = React.useRef<ScrollView | null>(null);
   const feedOffset = React.useRef(0);
   const [restoreAt, setRestoreAt] = React.useState<number | null>(null);
@@ -90,7 +95,18 @@ export default function App() {
     <View style={styles.shell}>
       <StatusBar style="dark" />
       <View style={styles.frame}>
-        {screen === 'login' ? <LoginScreen variant={loginVariant} onVariant={setLoginVariant} onPick={() => setScreen('feed')} /> : null}
+        {screen === 'login' ? (
+          <LoginScreen variant={loginVariant} onVariant={setLoginVariant} onPick={() => setScreen('suggestions')} onLogin={() => setScreen('feed')} />
+        ) : null}
+        {screen === 'suggestions' ? (
+          <FollowSuggestionsScreen
+            onCancel={() => setScreen('feed')}
+            onDone={(handles) => {
+              setFollowed((s) => ({ ...s, ...Object.fromEntries(handles.map((h) => [h, true])) }));
+              setScreen('feed');
+            }}
+          />
+        ) : null}
 
         {screen === 'feed' ? (
           <FeedScreen
@@ -106,7 +122,16 @@ export default function App() {
         ) : null}
 
         {screen === 'post' ? (
-          <ThreadDetail now={now} root={thread.root} replies={thread.replies} liked={liked} onToggleLike={toggleLike} onBack={backToFeed} />
+          <ThreadDetail
+            now={now}
+            root={thread.root}
+            replies={thread.replies}
+            liked={liked}
+            onToggleLike={toggleLike}
+            onBack={backToFeed}
+            followed={!!followed[thread.root.handle]}
+            onToggleFollow={() => toggleFollow(thread.root.handle)}
+          />
         ) : null}
 
         {screen === 'create' ? (
@@ -127,10 +152,21 @@ export default function App() {
         ) : null}
 
         {screen === 'search' ? <SearchScreen query={query} onQuery={setQuery} onBack={backToFeed} onNavigate={onNavigate} followed={followed} onToggleFollow={toggleFollow} /> : null}
-        {screen === 'activity' ? <ActivityScreen now={now} onNavigate={onNavigate} /> : null}
+        {screen === 'activity' ? (
+          <ActivityScreen now={now} onNavigate={onNavigate} notificationsOn={notificationsOn} onRequestNotifications={requestNotifications} />
+        ) : null}
         {screen === 'profile' ? <ProfileScreen onNavigate={onNavigate} followed={followed} onToggleFollow={toggleFollow} /> : null}
         {screen === 'settings' ? <SettingsScreen onBack={() => setScreen('profile')} /> : null}
-        {screen === 'messages' ? <MessagesScreen onNavigate={onNavigate} /> : null}
+        {screen === 'messages' ? <MessagesScreen onNavigate={onNavigate} onRequestNotifications={requestNotifications} /> : null}
+        {askNotifications ? (
+          <NotificationPrompt
+            onAllow={() => {
+              setNotificationsOn(true);
+              setAskNotifications(false);
+            }}
+            onDeny={() => setAskNotifications(false)}
+          />
+        ) : null}
       </View>
 
       <Pressable

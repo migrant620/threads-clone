@@ -13,10 +13,10 @@ type Props = {
 
 const TABS = ['Threads', 'Replies', 'Media', 'Reposts'] as const;
 const TAB = [
-  { x: 20.74, w: 60.0, size: 15.5, wgt: weight.medium, trk: -0.3 },
-  { x: 121.54, w: 54.5, size: 16, wgt: weight.soft },
-  { x: 224.16, w: 46.0, size: 15.5, wgt: weight.medium },
-  { x: 315.49, w: 59.5, size: 15, wgt: weight.strong },
+  { x: 20.74, w: 60.0, size: 15.5, wgt: weight.medium, idle: weight.strong, trk: -0.3, idleTrk: -0.39, dy: -0.95 },
+  { x: 121.54, w: 54.5, size: 16, wgt: weight.medium, idle: weight.medium, trk: -0.3, idleTrk: -0.245, dy: -0.45 },
+  { x: 224.16, w: 46.0, size: 15.5, wgt: weight.medium, idle: weight.strong, trk: -0.36, idleTrk: -0.24, dy: -0.95 },
+  { x: 315.49, w: 59.5, size: 15, wgt: weight.strong, idle: weight.strong, trk: -0.02, idleTrk: -0.02, dy: -0.95 },
 ];
 
 const CARD = [
@@ -27,6 +27,8 @@ const CARD = [
 
 export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleFollow }) => {
   const [tab, setTab] = React.useState<string>('Threads');
+  const [hidden, setHidden] = React.useState<Record<string, boolean>>({});
+  const visible = suggestions.filter((s) => !hidden[s.handle]);
 
   return (
     <View style={styles.screen}>
@@ -72,7 +74,7 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
             <Text style={styles.interestsRun}>+ Add interests</Text>
           </Pressable>
 
-          <Text style={[styles.followers, { top: 176.12 }]}>{account.followers} followers</Text>
+          <Text style={[styles.followers, { top: 175.37 }]}>{account.followers} followers</Text>
 
           <Pressable accessibilityRole="button" accessibilityLabel="Edit profile" style={[styles.plate, { left: 16, top: 214.71 }]}>
             <Text style={styles.plateRunEdit}>Edit profile</Text>
@@ -81,10 +83,10 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
             <Text style={styles.plateRunShare}>Share profile</Text>
           </Pressable>
 
-          <Text style={[styles.sectionRun, { left: 16, top: 274.74 }]}>People you may know</Text>
+          <Text style={[styles.sectionRun, { left: 16, top: 273.99 }]}>People you may know</Text>
 
           {CARD.map((c, i) => {
-            const s = suggestions[i];
+            const s = visible[i];
             if (!s) return null;
             return (
               <React.Fragment key={s.id}>
@@ -99,10 +101,10 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
                   <Verified size={16} />
                 </Pressable>
                 <Text style={[styles.cardName, { left: c.nameX, top: 410.47 }]} numberOfLines={1}>
-                  {s.handle}
+                  {s.name}
                 </Text>
                 {c.handleX !== null ? (
-                  <Text style={[styles.cardHandle, { left: c.handleX, top: 431.94 }]} numberOfLines={1}>
+                  <Text style={[styles.cardHandle, { left: c.handleX, top: 431.0 }]} numberOfLines={1}>
                     {s.handle}
                   </Text>
                 ) : null}
@@ -120,6 +122,7 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Dismiss action to hide user."
+                    onPress={() => setHidden((h) => ({ ...h, [s.handle]: true }))}
                     style={{ position: 'absolute', left: c.dismissX, top: 301.3, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}
                   >
                     <CloseIcon size={16} color={colors.secondary} />
@@ -137,14 +140,14 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
                 accessibilityRole="button"
                 accessibilityLabel={t}
                 onPress={() => setTab(t)}
-                style={{ position: 'absolute', left: TAB[i].x, top: 544.38, width: TAB[i].w, height: 20, justifyContent: 'center' }}
+                style={{ position: 'absolute', left: TAB[i].x, top: 544.38 + TAB[i].dy, width: TAB[i].w, height: 20, justifyContent: 'center' }}
               >
                 <Text
                   numberOfLines={1}
                   style={[
                     styles.tabRun,
-                    { fontSize: TAB[i].size, fontWeight: TAB[i].wgt },
-                    'trk' in TAB[i] ? { letterSpacing: TAB[i].trk } : null,
+                    { fontSize: TAB[i].size, fontWeight: on ? TAB[i].wgt : TAB[i].idle },
+                    { letterSpacing: on ? TAB[i].trk : TAB[i].idleTrk },
                     on ? { color: colors.ink } : null,
                   ]}
                 >
@@ -199,11 +202,11 @@ const styles = StyleSheet.create({
   addBadge: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFFFFF', borderWidth: 1, borderStyle: 'dashed', borderColor: colors.secondary, alignItems: 'center', justifyContent: 'center' },
   ownAvatar: { position: 'absolute', left: 312.94, top: 56.04, width: 64.04, height: 64.04, borderRadius: 32.02, backgroundColor: '#DBDBDB', alignItems: 'center', justifyContent: 'center' },
   interestsPill: { position: 'absolute', left: 16, width: 113, height: 32, borderRadius: 16, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  interestsRun: { fontSize: 13, fontWeight: weight.soft, letterSpacing: tracking.body +0.17, color: colors.secondary, fontFamily: 'ThreadsBody' },
-  followers: { position: 'absolute', left: 16, fontSize: 15, fontWeight: weight.soft, letterSpacing: tracking.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  interestsRun: { fontSize: 13, fontWeight: weight.soft, letterSpacing: tracking.body + 0.097, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  followers: { position: 'absolute', left: 16, fontSize: 15, fontWeight: weight.soft, letterSpacing: tracking.body + 0.155, color: colors.secondary, fontFamily: 'ThreadsBody' },
   plate: { position: 'absolute', height: 32, width: 175.3, borderRadius: 10, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  plateRunEdit: { fontSize: 15.5, fontWeight: weight.medium, letterSpacing: tracking.body -0.18, color: colors.ink, fontFamily: 'ThreadsBody' },
-  plateRunShare: { fontSize: 15, fontWeight: weight.strong, letterSpacing: tracking.body, color: colors.ink, fontFamily: 'ThreadsBody' },
+  plateRunEdit: { fontSize: 15.5, fontWeight: weight.medium, letterSpacing: tracking.body - 0.105, color: colors.ink, fontFamily: 'ThreadsBody' },
+  plateRunShare: { fontSize: 15, fontWeight: weight.strong, letterSpacing: tracking.body + 0.138, color: colors.ink, fontFamily: 'ThreadsBody' },
   sectionRun: { position: 'absolute', fontSize: 15, fontWeight: weight.semibold, letterSpacing: tracking.body, color: colors.ink, fontFamily: 'ThreadsBody' },
   cardName: { position: 'absolute', fontSize: 15, fontWeight: weight.semibold, lineHeight: 18, letterSpacing: tracking.body, color: colors.ink, fontFamily: 'ThreadsBody', width: 160 },
   cardHandle: { position: 'absolute', fontSize: 14, lineHeight: 16, letterSpacing: tracking.body, color: colors.secondary, fontFamily: 'ThreadsBody', width: 160 },

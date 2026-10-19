@@ -9,9 +9,10 @@ type Props = {
   variant: 'picker' | 'generic';
   onVariant: (v: 'picker' | 'generic') => void;
   onPick: () => void;
+  onLogin: () => void;
 };
 
-export const LoginScreen: React.FC<Props> = ({ variant, onVariant, onPick }) => {
+export const LoginScreen: React.FC<Props> = ({ variant, onVariant, onPick, onLogin }) => {
   const picker = variant === 'picker';
   const [user, setUser] = React.useState('');
   const [pass, setPass] = React.useState('');
@@ -86,7 +87,15 @@ export const LoginScreen: React.FC<Props> = ({ variant, onVariant, onPick }) => 
         />
       </View>
 
-      <Pressable accessibilityRole="button" accessibilityLabel="Log in" style={styles.loginKey}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Log in"
+        accessibilityState={{ disabled: !(user.trim() && pass) }}
+        onPress={() => {
+          if (user.trim() && pass) onLogin();
+        }}
+        style={styles.loginKey}
+      >
         <Text style={styles.loginRun}>Log in</Text>
       </Pressable>
 
@@ -176,7 +185,7 @@ const styles = StyleSheet.create({
   loginRun: { fontSize: type.body, lineHeight: 21.1, fontWeight: weight.soft, color: colors.loginInk, fontFamily: 'ThreadsBody' },
 
   forgotKey: { position: 'absolute', left: 118.6, top: 501.4, width: 155.7, height: 36, alignItems: 'center', justifyContent: 'center' },
-  forgotRun: { fontSize: 14.6, lineHeight: 25.1, fontWeight: weight.medium, color: colors.forgotInk, fontFamily: 'ThreadsBody' },
+  forgotRun: { marginTop: 1.3, fontSize: 14.6, lineHeight: 25.1, fontWeight: weight.medium, letterSpacing: 0.11, color: colors.forgotInk, fontFamily: 'ThreadsBody' },
 
   metaKey: { position: 'absolute', left: 166.7, top: 748.2, width: 60, height: 12, alignItems: 'center', justifyContent: 'center' },
 

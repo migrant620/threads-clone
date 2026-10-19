@@ -14,6 +14,8 @@ type Props = {
   onToggleLike: (id: string) => void;
   onBack: () => void;
   onOpenReply?: () => void;
+  followed: boolean;
+  onToggleFollow: () => void;
 };
 
 const HEADER = 56;
@@ -121,7 +123,7 @@ const RowPlate: React.FC<{ box: Box; label: string; children?: React.ReactNode }
   </Pressable>
 );
 
-export const ThreadDetail: React.FC<Props> = ({ now, root, replies, liked, onToggleLike, onBack }) => {
+export const ThreadDetail: React.FC<Props> = ({ now, root, replies, liked, onToggleLike, onBack, followed, onToggleFollow }) => {
   const [expanded, setExpanded] = React.useState(true);
   const [replyDraft, setReplyDraft] = React.useState('');
   const [added, setAdded] = React.useState<ReplyNode[]>([]);
@@ -188,10 +190,15 @@ export const ThreadDetail: React.FC<Props> = ({ now, root, replies, liked, onTog
         <TimeKey box={inPlate(T3.root.plate, T3.root.time)} time={relativeTime(root.postedAt, now)} />
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Follow"
-          style={[abs(inPlate(T3.root.plate, T3.root.follow)), styles.followPlate]}
+          accessibilityLabel={followed ? 'Following' : 'Follow'}
+          onPress={onToggleFollow}
+          style={[
+            abs(inPlate(T3.root.plate, T3.root.follow)),
+            styles.followPlate,
+            followed ? { left: T3.root.follow.x + T3.root.follow.w - 86, width: 86, ...styles.followPlateOn } : null,
+          ]}
         >
-          <Text style={styles.followRun}>Follow</Text>
+          <Text style={[styles.followRun, followed ? { color: colors.ink } : null]}>{followed ? 'Following' : 'Follow'}</Text>
         </Pressable>
       </RowPlate>
       <Text style={[styles.body, { left: T3.root.body.x, top: T3.root.body.y, width: T3.root.body.w }]}>{root.body}</Text>
@@ -398,13 +405,14 @@ const styles = StyleSheet.create({
   body: { position: 'absolute', fontSize: BODY_SIZE, lineHeight: BODY_LINE, letterSpacing: tracking.body, color: colors.ink, fontFamily: 'ThreadsBody' },
 
   followPlate: { borderRadius: 18, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
+  followPlateOn: { backgroundColor: colors.page, borderWidth: 1, borderColor: colors.border },
   followRun: { fontSize: type.body, fontWeight: weight.semibold, color: colors.onDark, fontFamily: 'ThreadsBody' },
 
   trendChip: { backgroundColor: colors.marker, borderRadius: 4 },
   trendingRun: { position: 'absolute', fontSize: 13.5, lineHeight: 14.2, color: colors.markerInk, fontFamily: 'ThreadsBody' },
 
-  sortRun: { fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
-  viewActivityRun: { fontSize: 14.5, fontWeight: weight.soft, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  sortRun: { fontSize: type.body, fontWeight: weight.semibold, letterSpacing: -0.24, color: colors.ink, fontFamily: 'ThreadsBody' },
+  viewActivityRun: { fontSize: 14.5, fontWeight: weight.soft, letterSpacing: -0.05, color: colors.secondary, fontFamily: 'ThreadsBody' },
 
   connector: { position: 'absolute', width: 2, backgroundColor: colors.border },
 
