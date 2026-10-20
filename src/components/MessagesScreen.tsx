@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { BottomNav, TopBar } from './Chrome';
 import { BellIcon, FiltersIcon, ImageIcon, InstagramMark, SearchIcon } from './Icons';
-import { colors, frame, tracking, weight } from '../tokens';
+import { colors, fonts, frame, tracking, weight } from '../tokens';
 
 
 type Props = {
@@ -106,14 +106,14 @@ const styles = StyleSheet.create({
   searchRow: { position: 'absolute', left: 0, top: 54.2, width: frame.width, height: 48 },
   searchPlate: { position: 'absolute', left: 16, top: 1.8, width: 361, height: 44.1, borderRadius: 16, backgroundColor: colors.navPlate },
   searchGlyph: { position: 'absolute', left: 11.6, top: 10.6 },
-  searchHint: { position: 'absolute', left: 36, top: 12.4, fontSize: 15.4, lineHeight: 17.5, letterSpacing: tracking.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  searchHint: { position: 'absolute', left: 36, top: 12.4, fontSize: 15.4, lineHeight: 17.5, letterSpacing: tracking.body, color: colors.secondary, fontFamily: fonts.body },
 
   filterColumn: { position: 'absolute', left: 14.2, top: 103, width: 48, height: 48 },
   filterKey: { position: 'absolute', left: 0, top: 7.3, width: 48, height: CHIP_H, borderRadius: CHIP_RADIUS, borderWidth: 1, borderColor: CHIP_INK, alignItems: 'center', justifyContent: 'center' },
   chipPlate: { position: 'absolute', top: CHIP_TOP, height: CHIP_H, borderRadius: CHIP_RADIUS },
   chipOn: { backgroundColor: colors.chip },
   chipOff: { borderWidth: 1, borderColor: CHIP_INK },
-  chipRun: { position: 'absolute', top: 118.3, fontSize: 15, lineHeight: 17.5, letterSpacing: 0, fontWeight: weight.medium, color: colors.ink, fontFamily: 'ThreadsBody' },
+  chipRun: { position: 'absolute', top: 118.3, fontSize: 15, lineHeight: 17.5, letterSpacing: 0, fontWeight: weight.medium, color: colors.ink, fontFamily: fonts.body },
 
   emptyPlate: { position: 'absolute', left: 84.1, top: 329.0, width: 224.8, height: 60, borderRadius: 12, backgroundColor: colors.navPlate },
   emptyMark: { position: 'absolute', left: 16.4, top: 13.2, width: 33.6, height: 33.6, borderRadius: 9, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
@@ -122,9 +122,9 @@ const styles = StyleSheet.create({
   emptyBadge: { position: 'absolute', left: 172, top: 13.2, width: 33.6, height: 33.6, borderRadius: 16.8, backgroundColor: '#E0E0E0', alignItems: 'center', justifyContent: 'center' },
   emptyEnvelope: { width: 15, height: 11, borderRadius: 1.6, backgroundColor: colors.onDark },
 
-  emptyTitle: { position: 'absolute', left: 74.597, top: 413.014, fontSize: 24, lineHeight: 28.019, letterSpacing: tracking.name, fontWeight: weight.bold, color: colors.ink, fontFamily: 'ThreadsBody' },
-  emptyBody: { position: 'absolute', left: 61.861, top: 449.039, fontSize: 15.4, lineHeight: 17.467, letterSpacing: tracking.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  emptyTitle: { position: 'absolute', left: 74.597, top: 413.014, fontSize: 24, lineHeight: 28.019, letterSpacing: tracking.name, fontWeight: weight.bold, color: colors.ink, fontFamily: fonts.body },
+  emptyBody: { position: 'absolute', left: 61.861, top: 449.039, fontSize: 15.4, lineHeight: 17.467, letterSpacing: tracking.body, color: colors.secondary, fontFamily: fonts.body },
 
   cta: { position: 'absolute', left: 109.2, top: 512.5, width: 175, height: 32.5, borderRadius: 16.25, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
-  ctaRun: { fontSize: 15, lineHeight: 17.5, letterSpacing: 0, fontWeight: weight.medium, color: colors.onDark, fontFamily: 'ThreadsBody' },
+  ctaRun: { fontSize: 15, lineHeight: 17.5, letterSpacing: 0, fontWeight: weight.medium, color: colors.onDark, fontFamily: fonts.body },
 });

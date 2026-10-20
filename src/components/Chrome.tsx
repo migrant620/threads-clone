@@ -28,7 +28,7 @@ import {
   ShareIcon,
   VerifiedIcon,
 } from './Icons';
-import { actions, colors, frame, icons as iconSize, radius, rhythm, space, tracking, type, weight, type Weight } from '../tokens';
+import { actions, colors, fonts, frame, icons as iconSize, radius, rhythm, space, tracking, type, type Weight, weight } from '../tokens';
 
 const SEP = '\ufffd';
 
@@ -40,7 +40,7 @@ export const StatusSpacer: React.FC<{ height?: number }> = ({ height = 0 }) => (
 
 export type TopRightKey = 'search' | 'bell' | 'more' | 'instagram' | 'drafts' | 'settings' | 'insights' | 'filters';
 
-export type TopRight = TopRightKey | { key: TopRightKey; label?: string; left: number; width?: number; top?: number };
+export type TopRight = TopRightKey | { key: TopRightKey; label?: string; left: number; width?: number; top?: number; selected?: boolean };
 
 type TopBarProps = {
   left?: 'menu' | 'back' | 'cancel' | 'none';
@@ -134,16 +134,18 @@ export const TopBar: React.FC<TopBarProps> = ({ left = 'menu', onLeft, wordmark,
     {right.map((entry, i) => {
       const spec = typeof entry === 'string' ? { key: entry, left: 341 - (right.length - 1 - i) * 48, width: 48, top: 4 } : { top: 4, ...entry };
       const label = (spec as { label?: string }).label ?? RIGHT_LABEL[spec.key];
+      const selected = (spec as { selected?: boolean }).selected;
       return (
         <Pressable
           key={`${spec.key}-${i}`}
           accessibilityRole="button"
           accessibilityLabel={label}
+          aria-pressed={selected}
           onPress={() => onRight?.(spec.key)}
           style={[styles.topKey, { left: spec.left, width: spec.width ?? 48, top: spec.top ?? 4 }]}
         >
           {spec.key === 'search' ? <SearchIcon size={iconSize.topBar} color={colors.searchInk} /> : null}
-          {spec.key === 'bell' ? <BellIcon size={iconSize.topBar} /> : null}
+          {spec.key === 'bell' ? <BellIcon size={iconSize.topBar} filled={!!selected} /> : null}
           {spec.key === 'more' ? <CircledMoreIcon size={iconSize.moreTop} /> : null}
           {spec.key === 'instagram' ? <InstagramMark size={iconSize.topBar} color={colors.ink} /> : null}
           {spec.key === 'drafts' ? <DraftsIcon size={22} /> : null}
@@ -187,6 +189,23 @@ export const PostHeader: React.FC<{
   <View style={{ height: rhythm.post.headerToBody }}>
     <View style={{ position: 'absolute', left: space.avatarLeft, top: 13.4 }}>
       <Avatar source={avatar} label={`${handle} profile photo`} />
+    </View>
+    <View
+      pointerEvents="none"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      aria-hidden
+      style={styles.visibleRun}
+    >
+      <Text numberOfLines={1} style={styles.handle}>
+        {handle}
+      </Text>
+      {verified ? (
+        <View style={styles.visibleBadge}>
+          <VerifiedIcon size={iconSize.verified} />
+        </View>
+      ) : null}
+      {time ? <Text style={[styles.time, styles.visibleTime]}>{time}</Text> : null}
     </View>
     <Pressable accessibilityRole="button" accessibilityLabel={`${handle} posted`} style={styles.postedRun} onPress={onOpen} />
     <Pressable
@@ -233,23 +252,6 @@ export const PostHeader: React.FC<{
         {time}
       </Text>
     </Pressable>
-    <View
-      pointerEvents="none"
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      aria-hidden
-      style={styles.visibleRun}
-    >
-      <Text numberOfLines={1} style={styles.handle}>
-        {handle}
-      </Text>
-      {verified ? (
-        <View style={styles.visibleBadge}>
-          <VerifiedIcon size={iconSize.verified} />
-        </View>
-      ) : null}
-      {time ? <Text style={[styles.time, styles.visibleTime]}>{time}</Text> : null}
-    </View>
     <Pressable accessibilityRole="button" accessibilityLabel="" style={styles.overflowPlate}>
       <MoreKey top={20.4} left={16} />
     </Pressable>
@@ -339,7 +341,8 @@ export const ActionRow: React.FC<{
 export type SheetRow = { label: string; onPress: () => void };
 
 export const ActionSheet: React.FC<{ title?: string; rows: SheetRow[]; onClose: () => void }> = ({ title, rows, onClose }) => (
-  <View style={styles.sheetScrim}>
+  <View style={styles.sheetScrim} role="dialog" aria-modal accessibilityViewIsModal>
+    <Pressable accessibilityRole="button" accessibilityLabel="Dismiss" onPress={onClose} style={styles.sheetBackdrop} />
     <View style={styles.sheetPanel}>
       <View style={styles.sheetGrabber} />
       {title ? <Text style={styles.sheetTitle}>{title}</Text> : null}
@@ -438,7 +441,7 @@ export const CloseKey: React.FC<{ onPress?: () => void; top?: number; left?: num
 
 export const MoreKey: React.FC<{ onPress?: () => void; top?: number; left?: number }> = ({ onPress, top = 13.4, left = 361 }) => (
   <Pressable accessibilityRole="button" accessibilityLabel="More options" onPress={onPress} style={{ position: 'absolute', left, top, width: 16, height: 16, alignItems: 'center', justifyContent: 'center' }}>
-    <MoreIcon size={iconSize.more} color={colors.overflowInk} />
+    <MoreIcon size={iconSize.more} color={colors.overflowInk} dotRadius={2.0} />
   </Pressable>
 );
 
@@ -447,37 +450,38 @@ const styles = StyleSheet.create({
   topKey: { position: 'absolute', top: 4, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   wordmarkRow: { position: 'absolute', left: 136.5, top: 0, width: 120.1, height: 56, alignItems: 'center', justifyContent: 'center' },
   titleBox: { position: 'absolute', left: 60, top: 13.4, width: 200, height: 37.5, justifyContent: 'center' },
-  titleRun: { fontSize: type.title, fontWeight: weight.bold, color: colors.ink, letterSpacing: tracking.title, fontFamily: 'ThreadsBody' },
+  titleRun: { fontSize: type.title, fontWeight: weight.bold, color: colors.ink, letterSpacing: tracking.title, fontFamily: fonts.body },
   subtitleBox: { position: 'absolute', left: 60, top: 32.8, flexDirection: 'row', alignItems: 'baseline' },
-  subtitleRun: { fontSize: type.caption, color: colors.secondary, fontFamily: 'ThreadsNumbers' },
-  subtitleTailRun: { fontSize: type.caption, color: colors.secondary, fontFamily: 'ThreadsBody' },
-  cancelRun: { fontSize: 15.6, color: colors.ink, fontFamily: 'ThreadsBody' },
-  handle: { fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
+  subtitleRun: { fontSize: type.caption, color: colors.secondary, fontFamily: fonts.numbers },
+  subtitleTailRun: { fontSize: type.caption, color: colors.secondary, fontFamily: fonts.body },
+  cancelRun: { fontSize: 15.6, color: colors.ink, fontFamily: fonts.body },
+  handle: { fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body },
   headerRow: { position: 'absolute', left: 0, top: -4.3, width: frame.width, height: 48, backgroundColor: 'transparent' },
   postedRun: { position: 'absolute', left: 0, top: 15.4, width: frame.width, height: 17.5, backgroundColor: 'transparent' },
   badgePlate: { position: 'absolute', left: 148.5, top: 0.3, width: 48, height: 48, backgroundColor: 'transparent' },
   badgeMergedRun: { position: 'absolute', left: 16.8, top: 15, width: 24.4, height: 17.5, lineHeight: 17.5, fontSize: 15, color: colors.page },
   overflowPlate: { position: 'absolute', left: 345, top: -5, width: 48, height: 48, backgroundColor: 'transparent' },
-  time: { fontSize: type.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  time: { fontSize: type.body, color: colors.secondary, fontFamily: fonts.body },
   ghost: { opacity: 0 },
   visibleRun: { position: 'absolute', left: space.gutter, top: 0, right: 56, height: 48, flexDirection: 'row', alignItems: 'center' },
   visibleBadge: { marginLeft: 4 },
   visibleTime: { marginLeft: 6 },
   authorChip: { marginLeft: 6, borderRadius: 9, backgroundColor: colors.chip, paddingHorizontal: 7, height: 18, justifyContent: 'center' },
-  authorChipText: { fontSize: 11.5, fontWeight: '500' as const, color: colors.chipInk, fontFamily: 'ThreadsBody' },
+  authorChipText: { fontSize: 11.5, fontWeight: '500' as const, color: colors.chipInk, fontFamily: fonts.body },
   actionKey: { flexDirection: 'row', alignItems: 'center' },
-  actionCount: { fontSize: type.body, color: colors.ink, marginLeft: 6, fontFamily: 'ThreadsBody' },
+  actionCount: { fontSize: type.body, color: colors.ink, marginLeft: 6, fontFamily: fonts.body },
   nav: { position: 'absolute', left: 0, top: 728, width: frame.width, height: 44, backgroundColor: colors.navPlate },
   createKey: { width: 24, height: 24, borderRadius: radius.key, borderWidth: 1.4, borderColor: colors.secondary, alignItems: 'center', justifyContent: 'center' },
   unreadDot: { position: 'absolute', right: 1, top: 0, width: 9, height: 9, borderRadius: 4.5, backgroundColor: colors.unread },
   homeIndicator: { position: 'absolute', left: 133, top: 76, width: 127, height: 5, borderRadius: 3, backgroundColor: '#1C1C1E' },
-  sortRun: { fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
-  sectionCaption: { position: 'absolute', fontWeight: weight.bold, color: colors.ink, fontFamily: 'ThreadsBody' },
+  sortRun: { fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body },
+  sectionCaption: { position: 'absolute', fontWeight: weight.bold, color: colors.ink, fontFamily: fonts.body },
   sheetScrim: { position: 'absolute', left: 0, top: 0, width: frame.width, height: frame.height, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 200, justifyContent: 'flex-end' },
+  sheetBackdrop: { flex: 1, width: frame.width },
   sheetPanel: { width: frame.width, backgroundColor: colors.dialog, borderTopLeftRadius: radius.card, borderTopRightRadius: radius.card, paddingTop: 8, paddingBottom: 24 },
   sheetGrabber: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border, marginBottom: 6 },
-  sheetTitle: { textAlign: 'center', fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody', paddingBottom: 6 },
+  sheetTitle: { textAlign: 'center', fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body, paddingBottom: 6 },
   sheetRow: { height: 52, alignItems: 'center', justifyContent: 'center' },
   sheetRowRule: { borderTopWidth: 1, borderTopColor: colors.hairline },
-  sheetRowRun: { fontSize: 15.5, fontWeight: weight.medium, color: colors.ink, fontFamily: 'ThreadsBody' },
+  sheetRowRun: { fontSize: 15.5, fontWeight: weight.medium, color: colors.ink, fontFamily: fonts.body },
 });

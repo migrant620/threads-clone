@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Avatar, BottomNav, Verified } from './Chrome';
+import { ActionSheet, Avatar, BottomNav, Verified } from './Chrome';
 import { CloseIcon, InsightsIcon, InstagramMark, PlusIcon, ProfileIcon, SearchIcon, SettingsIcon } from './Icons';
 import { account, suggestions } from '../data';
-import { colors, frame, icons as iconSize, radius, tracking, type, weight } from '../tokens';
+import { colors, fonts, frame, icons as iconSize, radius, tracking, type, weight } from '../tokens';
 
 type Props = {
   onNavigate: (key: string) => void;
@@ -29,6 +29,7 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
   const [tab, setTab] = React.useState<string>('Threads');
   const [hidden, setHidden] = React.useState<Record<string, boolean>>({});
   const visible = suggestions.filter((s) => !hidden[s.handle]);
+  const [sharing, setSharing] = React.useState(false);
 
   return (
     <View style={styles.screen}>
@@ -79,7 +80,7 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
           <Pressable accessibilityRole="button" accessibilityLabel="Edit profile" style={[styles.plate, { left: 16, top: 214.71 }]}>
             <Text style={styles.plateRunEdit}>Edit profile</Text>
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Share profile" style={[styles.plate, { left: 201.5, top: 214.71 }]}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Share profile" onPress={() => setSharing(true)} style={[styles.plate, { left: 201.5, top: 214.71 }]}>
             <Text style={styles.plateRunShare}>Share profile</Text>
           </Pressable>
 
@@ -186,6 +187,15 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
       </ScrollView>
 
       <BottomNav current="profile" onSelect={onNavigate} unread={false} />
+      {sharing ? (
+        <ActionSheet
+          rows={[
+            { label: 'Copy link', onPress: () => setSharing(false) },
+            { label: 'Share', onPress: () => setSharing(false) },
+          ]}
+          onClose={() => setSharing(false)}
+        />
+      ) : null}
     </View>
   );
 };
@@ -196,25 +206,25 @@ const styles = StyleSheet.create({
   topIcon: { position: 'absolute', left: 0, top: 0, width: frame.width, height: 56 },
   topKey: { position: 'absolute', top: 4, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   scroll: { position: 'absolute', left: 0, top: 0, width: frame.width, height: frame.navTop },
-  displayName: { position: 'absolute', left: 16, fontSize: 23, fontWeight: weight.semibold, lineHeight: 28, letterSpacing: tracking.body, color: colors.ink, fontFamily: 'ThreadsBody' },
-  handle: { position: 'absolute', left: 16, fontSize: 15, lineHeight: 18.3, fontWeight: weight.medium, letterSpacing: tracking.body, color: colors.ink, fontFamily: 'ThreadsBody' },
+  displayName: { position: 'absolute', left: 16, fontSize: 23, fontWeight: weight.semibold, lineHeight: 28, letterSpacing: tracking.body, color: colors.ink, fontFamily: fonts.body },
+  handle: { position: 'absolute', left: 16, fontSize: 15, lineHeight: 18.3, fontWeight: weight.medium, letterSpacing: tracking.body, color: colors.ink, fontFamily: fonts.body },
   addPlate: { position: 'absolute', width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   addBadge: { width: 34, height: 34, borderRadius: 17, backgroundColor: '#FFFFFF', borderWidth: 1, borderStyle: 'dashed', borderColor: colors.secondary, alignItems: 'center', justifyContent: 'center' },
   ownAvatar: { position: 'absolute', left: 312.94, top: 56.04, width: 64.04, height: 64.04, borderRadius: 32.02, backgroundColor: '#DBDBDB', alignItems: 'center', justifyContent: 'center' },
   interestsPill: { position: 'absolute', left: 16, width: 113, height: 32, borderRadius: 16, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  interestsRun: { fontSize: 13, fontWeight: weight.soft, letterSpacing: tracking.body + 0.097, color: colors.secondary, fontFamily: 'ThreadsBody' },
-  followers: { position: 'absolute', left: 16, fontSize: 15, fontWeight: weight.soft, letterSpacing: tracking.body + 0.155, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  interestsRun: { fontSize: 13, fontWeight: weight.soft, letterSpacing: tracking.body + 0.097, color: colors.secondary, fontFamily: fonts.body },
+  followers: { position: 'absolute', left: 16, fontSize: 15, fontWeight: weight.soft, letterSpacing: tracking.body + 0.155, color: colors.secondary, fontFamily: fonts.body },
   plate: { position: 'absolute', height: 32, width: 175.3, borderRadius: 10, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  plateRunEdit: { fontSize: 15.5, fontWeight: weight.medium, letterSpacing: tracking.body - 0.105, color: colors.ink, fontFamily: 'ThreadsBody' },
-  plateRunShare: { fontSize: 15, fontWeight: weight.strong, letterSpacing: tracking.body + 0.138, color: colors.ink, fontFamily: 'ThreadsBody' },
-  sectionRun: { position: 'absolute', fontSize: 15, fontWeight: weight.semibold, letterSpacing: tracking.body, color: colors.ink, fontFamily: 'ThreadsBody' },
-  cardName: { position: 'absolute', fontSize: 15, fontWeight: weight.semibold, lineHeight: 18, letterSpacing: tracking.body, color: colors.ink, fontFamily: 'ThreadsBody', width: 160 },
-  cardHandle: { position: 'absolute', fontSize: 14, lineHeight: 16, letterSpacing: tracking.body, color: colors.secondary, fontFamily: 'ThreadsBody', width: 160 },
+  plateRunEdit: { fontSize: 15.5, fontWeight: weight.medium, letterSpacing: tracking.body - 0.105, color: colors.ink, fontFamily: fonts.body },
+  plateRunShare: { fontSize: 15, fontWeight: weight.strong, letterSpacing: tracking.body + 0.138, color: colors.ink, fontFamily: fonts.body },
+  sectionRun: { position: 'absolute', fontSize: 15, fontWeight: weight.semibold, letterSpacing: tracking.body, color: colors.ink, fontFamily: fonts.body },
+  cardName: { position: 'absolute', fontSize: 15, fontWeight: weight.semibold, lineHeight: 18, letterSpacing: tracking.body, color: colors.ink, fontFamily: fonts.body, width: 160 },
+  cardHandle: { position: 'absolute', fontSize: 14, lineHeight: 16, letterSpacing: tracking.body, color: colors.secondary, fontFamily: fonts.body, width: 160 },
   cardFollow: { position: 'absolute', height: 48, borderRadius: radius.pill, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
   cardFollowOn: { backgroundColor: colors.page, borderWidth: 1, borderColor: colors.border },
-  cardFollowText: { fontSize: 15, fontWeight: weight.semibold, letterSpacing: 0, color: colors.onDark, fontFamily: 'ThreadsBody' },
+  cardFollowText: { fontSize: 15, fontWeight: weight.semibold, letterSpacing: 0, color: colors.onDark, fontFamily: fonts.body },
   cardFollowTextOn: { color: colors.ink },
-  tabRun: { color: colors.tertiary, fontFamily: 'ThreadsBody', lineHeight: 17.5, letterSpacing: -0.36 },
-  emptyRun: { position: 'absolute', letterSpacing: tracking.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  tabRun: { color: colors.tertiary, fontFamily: fonts.body, lineHeight: 17.5, letterSpacing: -0.36 },
+  emptyRun: { position: 'absolute', letterSpacing: tracking.body, color: colors.secondary, fontFamily: fonts.body },
   tabRule: { position: 'absolute', left: 0, right: 0, top: 576.8, height: 1, backgroundColor: colors.hairlineStrong },
 });

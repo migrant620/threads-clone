@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BackIcon, ChevronRightIcon } from './Icons';
-import { colors, frame, tracking, type } from '../tokens';
+import { colors, fonts, frame, tracking, type } from '../tokens';
 
 const GROUPS: Array<{ title: string; rows: Array<{ label: string; chevron?: boolean }> }> = [
   {
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   backKey: { width: 40, height: 48, alignItems: 'flex-start', justifyContent: 'center' },
   title: {
     marginLeft: 4,
-    fontFamily: 'ThreadsBody',
+    fontFamily: fonts.body,
     fontSize: type.name,
     lineHeight: type.nameLine,
     letterSpacing: tracking.name,
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   groupTitle: {
     marginLeft: 16,
     marginBottom: 8,
-    fontFamily: 'ThreadsBody',
+    fontFamily: fonts.body,
     fontSize: type.caption,
     lineHeight: type.captionLine,
     color: colors.secondary,
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   },
   rowDivided: { borderTopWidth: 1, borderTopColor: colors.hairlineStrong },
   rowLabel: {
-    fontFamily: 'ThreadsBody',
+    fontFamily: fonts.body,
     fontSize: type.body,
     lineHeight: type.bodyLine,
     letterSpacing: tracking.body,

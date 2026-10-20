@@ -1,5 +1,5 @@
 
-import type { TextStyle } from 'react-native';
+import { Platform, type TextStyle } from 'react-native';
 
 type WeightStop = Extract<NonNullable<TextStyle['fontWeight']>, string>;
 export type Weight = WeightStop;
@@ -11,6 +11,12 @@ export const frame = {
   status: 49.5,
   navHeight: 80,
   navTop: 697,
+};
+
+const webStack = ', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+export const fonts = {
+  body: Platform.OS === 'web' ? `ThreadsBody${webStack}` : 'ThreadsBody',
+  numbers: Platform.OS === 'web' ? `ThreadsNumbers${webStack}` : 'ThreadsNumbers',
 };
 
 export const colors = {
