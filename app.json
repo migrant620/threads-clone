@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "Threads UI Prototype",
-    "slug": "threads-ui",
-    "scheme": "threads-ui",
+    "slug": "threads-clone",
+    "scheme": "threads-clone",
     "version": "0.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
