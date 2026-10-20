@@ -1,11 +1,11 @@
 <p align="center">
-  <a href="https://threads-ui.edgeone.cool"><img src="docs/demo.gif" width="280" alt="Scrolling the Threads feed, opening a post and its reply tree, then writing a new thread and watching the Post button turn from grey to black"></a>
+  <a href="https://migrant620.github.io/threads/"><img src="docs/demo.gif" width="280" alt="Scrolling the Threads feed, opening a post and its reply tree, then writing a new thread and watching the Post button turn from grey to black"></a>
 </p>
 
 <h1 align="center">Threads UI</h1>
 
 <p align="center">
-  <a href="https://threads-ui.edgeone.cool"><img src="https://img.shields.io/badge/%E2%96%B6%20Live%20demo-threads--ui.edgeone.cool-FC3040?style=for-the-badge" alt="Live demo"></a>
+  <a href="https://migrant620.github.io/threads/"><img src="https://img.shields.io/badge/%E2%96%B6%20Live%20demo-migrant620.github.io%2Fthreads-FC3040?style=for-the-badge" alt="Live demo"></a>
 </p>
 
 <p align="center">
@@ -87,7 +87,7 @@ The static output is written to `dist/`. Serve that directory over HTTP or HTTPS
 
 ## Demo build
 
-The published demo at <https://threads-ui.edgeone.cool> is built from this repository. It was last rebuilt and redeployed on 2026-10-19 (EdgeOne deployment `dplm27yxycdd`, source revision `84323bcf`).
+The published demo at <https://migrant620.github.io/threads/> is built from this repository. It was last rebuilt and redeployed on 2026-10-20 (GitHub Pages commit `0dd8495e`, source revision `57a93c61`).
 
 ## Scope and limitations
 
