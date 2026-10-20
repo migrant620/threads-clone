@@ -3,7 +3,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { ActionRow, Avatar, TopBar } from './Chrome';
 import { ChevronDownIcon, ExpandIcon, GifIcon, HeartIcon, ImageIcon, MoreIcon } from './Icons';
 import { account, formatCount, relativeTime, type Post, type ReplyNode } from '../data';
-import { actions, colors, frame, icons as iconSize, space, tracking, type, weight } from '../tokens';
+import { actions, colors, fonts, frame, icons as iconSize, space, tracking, type, weight } from '../tokens';
 
 
 type Props = {
@@ -16,6 +16,8 @@ type Props = {
   onOpenReply?: () => void;
   followed: boolean;
   onToggleFollow: () => void;
+  notificationsOn: boolean;
+  onRequestNotifications: () => void;
 };
 
 const HEADER = 56;
@@ -123,7 +125,13 @@ const RowPlate: React.FC<{ box: Box; label: string; children?: React.ReactNode }
   </Pressable>
 );
 
-export const ThreadDetail: React.FC<Props> = ({ now, root, replies, liked, onToggleLike, onBack, followed, onToggleFollow }) => {
+export const ThreadDetail: React.FC<Props> = ({ now, root, replies, liked, onToggleLike, onBack, followed, onToggleFollow, notificationsOn, onRequestNotifications }) => {
+  const [subscribed, setSubscribed] = React.useState(false);
+  const onHeaderKey = (key: string) => {
+    if (key !== 'bell') return;
+    if (!subscribed && !notificationsOn) onRequestNotifications();
+    setSubscribed((v) => !v);
+  };
   const [expanded, setExpanded] = React.useState(true);
   const [replyDraft, setReplyDraft] = React.useState('');
   const [added, setAdded] = React.useState<ReplyNode[]>([]);
@@ -176,9 +184,10 @@ export const ThreadDetail: React.FC<Props> = ({ now, root, replies, liked, onTog
       subtitleTail="views"
       subtitleGeo={{ top: 32.8, line: 14.2, numSize: 14.5, tailSize: 14.5, tailLeft: 47.3 }}
       right={[
-        { key: 'bell', label: 'Turn on notifications to thread for 24 hours', left: 300.9, width: 32 },
+        { key: 'bell', label: 'Turn on notifications to thread for 24 hours', left: 300.9, width: 32, selected: subscribed },
         { key: 'more', left: 333, width: 48 },
       ]}
+      onRight={onHeaderKey}
     />
 
     <ScrollView style={styles.scroll} contentContainerStyle={{ width: frame.width, ...(hasAdded ? { height: BAR_TOP - HEADER + addedLayout.total } : { height: BAR_TOP - HEADER }) }}>
@@ -323,7 +332,8 @@ export const ThreadDetail: React.FC<Props> = ({ now, root, replies, liked, onTog
       <TextInput
         ref={barInput}
         accessibilityLabel="Reply text"
-        placeholder={undefined}
+        placeholder={`Reply to ${root.handle}`}
+        placeholderTextColor={colors.secondary}
         value={replyDraft}
         onChangeText={setReplyDraft}
         returnKeyType="send"
@@ -331,11 +341,6 @@ export const ThreadDetail: React.FC<Props> = ({ now, root, replies, liked, onTog
         onSubmitEditing={() => postReply()}
         style={styles.barInput}
       />
-      {replyDraft.length === 0 ? (
-        <Text numberOfLines={1} style={[styles.promptRun, styles.promptHint]} pointerEvents="none">
-          Reply to {root.handle}
-        </Text>
-      ) : null}
     </Pressable>
     <Pressable accessibilityRole="button" accessibilityLabel="Gallery" style={[abs(T3.bar.gallery), styles.barKey]}>
       <ImageIcon size={27.5} />
@@ -400,38 +405,37 @@ const styles = StyleSheet.create({
   centred: { justifyContent: 'center' },
   hairline: { position: 'absolute', left: 0, width: frame.width, height: 1, backgroundColor: colors.hairline },
 
-  handle: { fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
-  time: { fontSize: type.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
-  body: { position: 'absolute', fontSize: BODY_SIZE, lineHeight: BODY_LINE, letterSpacing: tracking.body, color: colors.ink, fontFamily: 'ThreadsBody' },
+  handle: { fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body },
+  time: { fontSize: type.body, color: colors.secondary, fontFamily: fonts.body },
+  body: { position: 'absolute', fontSize: BODY_SIZE, lineHeight: BODY_LINE, letterSpacing: tracking.body, color: colors.ink, fontFamily: fonts.body },
 
   followPlate: { borderRadius: 18, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
   followPlateOn: { backgroundColor: colors.page, borderWidth: 1, borderColor: colors.border },
-  followRun: { fontSize: type.body, fontWeight: weight.semibold, color: colors.onDark, fontFamily: 'ThreadsBody' },
+  followRun: { fontSize: type.body, fontWeight: weight.semibold, color: colors.onDark, fontFamily: fonts.body },
 
   trendChip: { backgroundColor: colors.marker, borderRadius: 4 },
-  trendingRun: { position: 'absolute', fontSize: 13.5, lineHeight: 14.2, color: colors.markerInk, fontFamily: 'ThreadsBody' },
+  trendingRun: { position: 'absolute', fontSize: 13.5, lineHeight: 14.2, color: colors.markerInk, fontFamily: fonts.body },
 
-  sortRun: { fontSize: type.body, fontWeight: weight.semibold, letterSpacing: -0.24, color: colors.ink, fontFamily: 'ThreadsBody' },
-  viewActivityRun: { fontSize: 14.5, fontWeight: weight.soft, letterSpacing: -0.05, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  sortRun: { fontSize: type.body, fontWeight: weight.semibold, letterSpacing: -0.24, color: colors.ink, fontFamily: fonts.body },
+  viewActivityRun: { fontSize: 14.5, fontWeight: weight.soft, letterSpacing: -0.05, color: colors.secondary, fontFamily: fonts.body },
 
   connector: { position: 'absolute', width: 2, backgroundColor: colors.border },
 
   authorChip: { borderRadius: 10, backgroundColor: colors.chip, justifyContent: 'center' },
-  authorRun: { fontSize: 13, lineHeight: 14.2, letterSpacing: -0.8, color: colors.verified, fontFamily: 'ThreadsBody' },
+  authorRun: { fontSize: 13, lineHeight: 14.2, letterSpacing: -0.8, color: colors.verified, fontFamily: fonts.body },
 
   likedRing: { position: 'absolute', width: 17, height: 17, borderRadius: 8.5, backgroundColor: colors.page, alignItems: 'center', justifyContent: 'center' },
   likedFace: { width: 14, height: 14, borderRadius: 7, opacity: 0.4 },
   likedHeartRing: { position: 'absolute', width: 12.4, height: 12.4, borderRadius: 6.2, backgroundColor: colors.page, alignItems: 'center', justifyContent: 'center' },
 
-  showRepliesRun: { fontSize: 15.5, lineHeight: 17.5, fontWeight: weight.semibold, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  showRepliesRun: { fontSize: 15.5, lineHeight: 17.5, fontWeight: weight.semibold, color: colors.secondary, fontFamily: fonts.body },
 
   postedHead: { flexDirection: 'row', alignItems: 'center', height: 48, paddingLeft: space.avatarLeft, paddingRight: space.gutter, borderTopWidth: 1, borderTopColor: colors.hairline },
-  postedHandle: { fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
-  postedTime: { fontSize: type.body, color: colors.secondary, marginLeft: 6, fontFamily: 'ThreadsBody' },
-  postedBody: { marginLeft: space.gutter, fontSize: BODY_SIZE, lineHeight: BODY_LINE, letterSpacing: tracking.body, color: colors.ink, fontFamily: 'ThreadsBody', marginTop: 2, paddingRight: space.gutter },
+  postedHandle: { fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body },
+  postedTime: { fontSize: type.body, color: colors.secondary, marginLeft: 6, fontFamily: fonts.body },
+  postedBody: { marginLeft: space.gutter, fontSize: BODY_SIZE, lineHeight: BODY_LINE, letterSpacing: tracking.body, color: colors.ink, fontFamily: fonts.body, marginTop: 2, paddingRight: space.gutter },
 
   barPrompt: { justifyContent: 'center' },
-  promptRun: { fontSize: 16.5, lineHeight: 17.5, color: colors.secondary, fontFamily: 'ThreadsBody' },
   barInput: {
     position: 'absolute',
     left: 0,
@@ -444,10 +448,9 @@ const styles = StyleSheet.create({
     fontSize: 16.5,
     lineHeight: 17.5,
     color: colors.ink,
-    fontFamily: 'ThreadsBody',
+    fontFamily: fonts.body,
     backgroundColor: 'transparent',
     outlineStyle: 'none',
   } as never,
-  promptHint: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' },
   barKey: { alignItems: 'center', justifyContent: 'center' },
 });

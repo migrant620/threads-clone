@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { frame } from '../tokens';
+import { fonts, frame } from '../tokens';
 
 
 type Props = {
@@ -23,7 +23,7 @@ const RingingBell: React.FC = () => (
 );
 
 export const NotificationPrompt: React.FC<Props> = ({ onAllow, onDeny }) => (
-  <View style={styles.layer} accessibilityViewIsModal>
+  <View style={styles.layer} role="dialog" aria-modal accessibilityViewIsModal>
     <Pressable accessibilityRole="button" accessibilityLabel="Dismiss" onPress={onDeny} style={styles.scrim} />
     <View style={styles.card} accessibilityRole="alert">
       <View style={styles.glyph}>
@@ -56,11 +56,11 @@ const styles = StyleSheet.create({
     lineHeight: 25.1,
     textAlign: 'center',
     color: INK,
-    fontFamily: 'ThreadsBody',
+    fontFamily: fonts.body,
   },
   bold: { fontWeight: '700' },
   key: { position: 'absolute', left: 49.9 - 25.8, width: 293.3, height: 56, backgroundColor: KEY, alignItems: 'center', justifyContent: 'center' },
   keyTop: { borderTopLeftRadius: 12.5, borderTopRightRadius: 12.5, borderBottomLeftRadius: 4, borderBottomRightRadius: 4 },
   keyBottom: { borderTopLeftRadius: 4, borderTopRightRadius: 4, borderBottomLeftRadius: 12.5, borderBottomRightRadius: 12.5 },
-  keyRun: { fontSize: 16, color: INK, fontFamily: 'ThreadsBody' },
+  keyRun: { fontSize: 16, color: INK, fontFamily: fonts.body },
 });

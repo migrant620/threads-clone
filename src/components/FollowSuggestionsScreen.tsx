@@ -3,7 +3,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import Svg, { Path } from 'react-native-svg';
 import { CloseIcon } from './Icons';
 import { onboardingSuggestions } from '../data';
-import { colors, frame, weight } from '../tokens';
+import { colors, fonts, frame, weight } from '../tokens';
 
 
 type Props = {
@@ -96,16 +96,16 @@ const styles = StyleSheet.create({
     fontWeight: weight.bold,
     textAlign: 'center',
     color: colors.ink,
-    fontFamily: 'ThreadsBody',
+    fontFamily: fonts.body,
   },
   selectKey: { position: 'absolute', left: 257, top: 116.8 - 56, width: 120, height: 40.8, alignItems: 'flex-end', justifyContent: 'center' },
-  selectRun: { fontSize: 15, fontWeight: weight.bold, letterSpacing: -0.2, color: colors.ink, fontFamily: 'ThreadsBody' },
+  selectRun: { fontSize: 15, fontWeight: weight.bold, letterSpacing: -0.2, color: colors.ink, fontFamily: fonts.body },
   row: { position: 'absolute', left: 0, width: frame.width, height: ROW_PITCH },
   avatar: { position: 'absolute', left: 16, top: 12, width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surfaceAlt },
-  handle: { position: 'absolute', left: 68, top: 10.5, width: 260, fontSize: 16, lineHeight: 19, fontWeight: weight.semibold, letterSpacing: -0.2, color: colors.ink, fontFamily: 'ThreadsBody' },
-  followers: { position: 'absolute', left: 68, top: 32, fontSize: 15, lineHeight: 17.5, letterSpacing: -0.2, color: colors.menuInk, fontFamily: 'ThreadsBody' },
+  handle: { position: 'absolute', left: 68, top: 10.5, width: 260, fontSize: 16, lineHeight: 19, fontWeight: weight.semibold, letterSpacing: -0.2, color: colors.ink, fontFamily: fonts.body },
+  followers: { position: 'absolute', left: 68, top: 32, fontSize: 15, lineHeight: 17.5, letterSpacing: -0.2, color: colors.menuInk, fontFamily: fonts.body },
   checkKey: { position: 'absolute', left: 342.1, top: 6, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   checkOff: { width: 18.6, height: 18.6, borderRadius: 9.3, borderWidth: 1.5, borderColor: colors.border },
   followAll: { position: 'absolute', left: 16, top: 726, width: 361, height: 51, borderRadius: 19, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
-  followAllRun: { fontSize: 16, fontWeight: weight.semibold, color: colors.onDark, fontFamily: 'ThreadsBody' },
+  followAllRun: { fontSize: 16, fontWeight: weight.semibold, color: colors.onDark, fontFamily: fonts.body },
 });

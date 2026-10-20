@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useFonts } from 'expo-font';
+import { FontDisplay, useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { FeedScreen } from './components/FeedScreen';
 import { ThreadDetail } from './components/ThreadDetail';
@@ -9,7 +9,7 @@ import { SearchScreen } from './components/SearchScreen';
 import { ActivityScreen } from './components/ActivityScreen';
 import { ProfileScreen } from './components/ProfileScreen';
 import { MessagesScreen } from './components/MessagesScreen';
-import { LoginScreen } from './components/LoginScreen';
+import { LoginScreen, type LoginVariant } from './components/LoginScreen';
 import { SettingsScreen } from './components/SettingsScreen';
 import { FollowSuggestionsScreen } from './components/FollowSuggestionsScreen';
 import { NotificationPrompt } from './components/NotificationPrompt';
@@ -18,18 +18,26 @@ import { colors, frame } from './tokens';
 import { useVariableWeightFont } from './webfont';
 
 
+const FONT_GRACE_MS = 1500;
+
 type Screen = 'login' | 'suggestions' | 'feed' | 'post' | 'create' | 'search' | 'activity' | 'profile' | 'messages' | 'settings';
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
-    ThreadsBody: require('../assets/fonts/InstrumentSans-VF.ttf'),
-    ThreadsNumbers: require('../assets/fonts/Roboto_500Medium.ttf'),
+  const [fontsLoaded, fontError] = useFonts({
+    ThreadsBody: { uri: require('../assets/fonts/InstrumentSans-VF.ttf'), display: FontDisplay.SWAP },
+    ThreadsNumbers: { uri: require('../assets/fonts/Roboto_500Medium.ttf'), display: FontDisplay.SWAP },
   });
+  const [fontGraceOver, setFontGraceOver] = React.useState(false);
+  React.useEffect(() => {
+    const t = setTimeout(() => setFontGraceOver(true), FONT_GRACE_MS);
+    return () => clearTimeout(t);
+  }, []);
+  const fontsReady = fontsLoaded || !!fontError || fontGraceOver;
   useVariableWeightFont('ThreadsBody');
 
   const [now] = React.useState(() => Date.now());
   const [screen, setScreen] = React.useState<Screen>('feed');
-  const [loginVariant, setLoginVariant] = React.useState<'picker' | 'generic'>('picker');
+  const [loginVariant, setLoginVariant] = React.useState<LoginVariant>('picker');
   const [liked, setLiked] = React.useState<Record<string, boolean>>({});
   const [followed, setFollowed] = React.useState<Record<string, boolean>>({});
   const [openPostId, setOpenPostId] = React.useState<string | null>(null);
@@ -40,6 +48,14 @@ export default function App() {
   const [askNotifications, setAskNotifications] = React.useState(false);
   const [notificationsOn, setNotificationsOn] = React.useState(false);
   const requestNotifications = React.useCallback(() => setAskNotifications(true), []);
+  const [joining, setJoining] = React.useState(false);
+  const closePrompt = React.useCallback(() => {
+    setAskNotifications(false);
+    if (joining) {
+      setJoining(false);
+      setScreen('suggestions');
+    }
+  }, [joining]);
   const feedScroll = React.useRef<ScrollView | null>(null);
   const feedOffset = React.useRef(0);
   const [restoreAt, setRestoreAt] = React.useState<number | null>(null);
@@ -83,7 +99,7 @@ export default function App() {
     return setScreen('login');
   };
 
-  if (!fontsLoaded) {
+  if (!fontsReady) {
     return (
       <View style={styles.shell}>
         <Text style={styles.loading} accessibilityLabel="Loading">Loading</Text>
@@ -96,7 +112,16 @@ export default function App() {
       <StatusBar style="dark" />
       <View style={styles.frame}>
         {screen === 'login' ? (
-          <LoginScreen variant={loginVariant} onVariant={setLoginVariant} onPick={() => setScreen('suggestions')} onLogin={() => setScreen('feed')} />
+          <LoginScreen
+            variant={loginVariant}
+            onVariant={setLoginVariant}
+            onPick={() => setScreen('suggestions')}
+            onJoin={() => {
+              setJoining(true);
+              setAskNotifications(true);
+            }}
+            onLogin={() => setScreen('feed')}
+          />
         ) : null}
         {screen === 'suggestions' ? (
           <FollowSuggestionsScreen
@@ -131,6 +156,8 @@ export default function App() {
             onBack={backToFeed}
             followed={!!followed[thread.root.handle]}
             onToggleFollow={() => toggleFollow(thread.root.handle)}
+            notificationsOn={notificationsOn}
+            onRequestNotifications={requestNotifications}
           />
         ) : null}
 
@@ -162,9 +189,9 @@ export default function App() {
           <NotificationPrompt
             onAllow={() => {
               setNotificationsOn(true);
-              setAskNotifications(false);
+              closePrompt();
             }}
-            onDeny={() => setAskNotifications(false)}
+            onDeny={closePrompt}
           />
         ) : null}
       </View>
@@ -174,7 +201,7 @@ export default function App() {
         accessibilityLabel="Show login screen"
         onPress={() => {
           if (screen === 'login') {
-            setLoginVariant((v) => (v === 'generic' ? 'picker' : 'generic'));
+            setLoginVariant((v) => (v === 'generic' ? 'picker' : v === 'picker' ? 'join' : 'generic'));
           } else {
             setLoginVariant('generic');
             setScreen('login');

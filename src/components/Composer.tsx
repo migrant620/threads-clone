@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Avatar, TopBar } from './Chrome';
 import { ChevronRightIcon, CircledMoreIcon, CloseIcon, DraftsIcon, GifIcon, ImageIcon, MusicIcon, StickerIcon } from './Icons';
 import { account } from '../data';
-import { colors, connector, frame, radius, space, type, weight } from '../tokens';
+import { colors, connector, fonts, frame, radius, space, type, weight } from '../tokens';
 
 
 type Props = {
@@ -212,10 +212,10 @@ const styles = StyleSheet.create({
   segmentConnector: { position: 'absolute', left: space.avatarLeft + 23, width: connector.width, backgroundColor: colors.border, borderRadius: 1 },
 
   handleKey: { position: 'absolute', left: 60, width: 55.7, height: 48, justifyContent: 'center' },
-  handle: { fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
+  handle: { fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body },
   chevronKey: { position: 'absolute', left: 96.8, top: 56.4, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   audiencePlate: { position: 'absolute', left: 129.9, top: 56, width: 135.4, height: 48, justifyContent: 'center' },
-  audienceText: { position: 'absolute', left: 0, top: 15.3, width: 220, fontSize: type.body, lineHeight: 17.5, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  audienceText: { position: 'absolute', left: 0, top: 15.3, width: 220, fontSize: type.body, lineHeight: 17.5, color: colors.secondary, fontFamily: fonts.body },
 
   fieldBox: { position: 'absolute', left: 60, width: 316.9 },
   field: {
@@ -228,16 +228,16 @@ const styles = StyleSheet.create({
     fontSize: type.body,
     lineHeight: 18.3,
     color: colors.ink,
-    fontFamily: 'ThreadsBody',
+    fontFamily: fonts.body,
     backgroundColor: 'transparent',
     outlineStyle: 'none',
   } as never,
-  hint: { position: 'absolute', left: 0, top: 0, width: 83.7, height: 17.5, lineHeight: 17.5, fontSize: 14.3, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  hint: { position: 'absolute', left: 0, top: 0, width: 83.7, height: 17.5, lineHeight: 17.5, fontSize: 14.3, color: colors.secondary, fontFamily: fonts.body },
 
   chip: { position: 'absolute', width: 31, height: 18, borderRadius: 9, backgroundColor: colors.chip },
-  chipDigit: { position: 'absolute', height: 40, fontSize: 11.5, lineHeight: 14.2, color: colors.secondary, fontFamily: 'ThreadsNumbers' },
+  chipDigit: { position: 'absolute', height: 40, fontSize: 11.5, lineHeight: 14.2, color: colors.secondary, fontFamily: fonts.numbers },
 
-  mergedRun: { position: 'absolute', fontSize: 15, color: colors.page, fontFamily: 'ThreadsBody' },
+  mergedRun: { position: 'absolute', fontSize: 15, color: colors.page, fontFamily: fonts.body },
   audienceMergedRun: { left: -14.2, top: 15.3, width: 260, lineHeight: 17.5 },
 
   clearPlate: { position: 'absolute', left: 347.1, width: 45.9, height: 48, alignItems: 'center', justifyContent: 'center' },
@@ -245,21 +245,21 @@ const styles = StyleSheet.create({
 
   attachKey: { position: 'absolute', top: 0, alignItems: 'center', justifyContent: 'center', borderRadius: radius.media },
   addToThread: { position: 'absolute', left: 60, height: 17.5, justifyContent: 'center' },
-  addToThreadText: { fontSize: 14.4, fontWeight: weight.soft, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  addToThreadText: { fontSize: 14.4, fontWeight: weight.soft, color: colors.secondary, fontFamily: fonts.body },
 
   bottomBar: { position: 'absolute', left: 0, top: 442.9, width: frame.width, height: 56 },
   postOptions: { position: 'absolute', left: 44, top: 15.2, height: 17.5, justifyContent: 'center' },
-  postOptionsText: { fontSize: type.body, fontWeight: weight.medium, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  postOptionsText: { fontSize: type.body, fontWeight: weight.medium, color: colors.secondary, fontFamily: fonts.body },
   countPicker: { position: 'absolute', left: 234.7, top: 0, width: 66.2, height: 48, alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 4 },
   countThumb: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.pickerGrey },
   postKey: { position: 'absolute', left: 316.7, top: 4, width: 64, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  postKeyText: { fontSize: type.body, fontWeight: weight.medium, letterSpacing: 0.12, fontFamily: 'ThreadsBody' },
+  postKeyText: { fontSize: type.body, fontWeight: weight.medium, letterSpacing: 0.12, fontFamily: fonts.body },
 
   scrim: { position: 'absolute', left: 0, top: 0, width: frame.width, height: frame.height, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 100 },
   dialogCard: { position: 'absolute', left: 81.511, top: 298.753, width: 229.978, height: 180.51, borderRadius: 14, backgroundColor: colors.dialog },
-  dialogTitle: { position: 'absolute', left: 0, top: 32.022, width: 229.978, textAlign: 'center', fontSize: 15, lineHeight: 18.194, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
+  dialogTitle: { position: 'absolute', left: 0, top: 32.022, width: 229.978, textAlign: 'center', fontSize: 15, lineHeight: 18.194, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body },
   dialogRule: { position: 'absolute', left: 0, width: 229.978, height: DEVICE_PX, backgroundColor: 'rgb(219,219,219)' },
   dialogRow: { position: 'absolute', left: 0, top: 82.603, width: 229.978, height: 48.761, alignItems: 'center', justifyContent: 'center' },
-  dialogDiscard: { fontSize: 15, fontWeight: weight.regular, color: colors.danger, fontFamily: 'ThreadsBody' },
-  dialogCancel: { fontSize: 15, fontWeight: weight.regular, color: colors.ink, fontFamily: 'ThreadsBody' },
+  dialogDiscard: { fontSize: 15, fontWeight: weight.regular, color: colors.danger, fontFamily: fonts.body },
+  dialogCancel: { fontSize: 15, fontWeight: weight.regular, color: colors.ink, fontFamily: fonts.body },
 });

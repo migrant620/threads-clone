@@ -2,33 +2,57 @@ import * as React from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { InstagramMark, MetaLogo, WordmarkGlyph, WordmarkPlate } from './Icons';
 import { account } from '../data';
-import { colors, frame, radius, shadow, type, weight } from '../tokens';
+import { colors, fonts, frame, radius, shadow, type, weight } from '../tokens';
 
+
+export type LoginVariant = 'picker' | 'generic' | 'join';
 
 type Props = {
-  variant: 'picker' | 'generic';
-  onVariant: (v: 'picker' | 'generic') => void;
+  variant: LoginVariant;
+  onVariant: (v: LoginVariant) => void;
   onPick: () => void;
+  onJoin: () => void;
   onLogin: () => void;
 };
 
-export const LoginScreen: React.FC<Props> = ({ variant, onVariant, onPick, onLogin }) => {
+export const LoginScreen: React.FC<Props> = ({ variant, onVariant, onPick, onJoin, onLogin }) => {
   const picker = variant === 'picker';
   const [user, setUser] = React.useState('');
   const [pass, setPass] = React.useState('');
 
-  if (picker) {
+  if (picker || variant === 'join') {
+    const join = variant === 'join';
     return (
       <View style={styles.screen}>
-        <View style={styles.wordmarkBlock}>
+        <View style={[styles.wordmarkBlock, join ? { top: 179.0 } : null]}>
           <WordmarkPlate width={264} height={80} />
         </View>
 
-        <Pressable accessibilityRole="button" accessibilityLabel={`${account.handle} account`} onPress={onPick} style={styles.card}>
+        {join ? (
+          <Text style={styles.consent}>
+            By joining Threads, you agree to our <Text style={styles.consentLink}>terms</Text> and{' '}
+            <Text style={styles.consentLink}>policies</Text>. We&apos;ll add your account to Accounts Center and{' '}
+            <Text style={styles.consentLink}>combine and use your info</Text> across accounts to personalize your experiences and ads.
+          </Text>
+        ) : null}
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={join ? `Join with Instagram as ${account.handle}` : `${account.handle} account`}
+          onPress={join ? onJoin : onPick}
+          style={[styles.card, join ? { top: 397.7 } : null]}
+        >
           <View style={styles.cardMark}>
             <InstagramMark size={48} />
           </View>
-          <Text style={styles.cardRun}>{account.handle}</Text>
+          {join ? (
+            <>
+              <Text style={[styles.cardRun, { top: 25.5 }]}>Join with Instagram</Text>
+              <Text style={[styles.cardSubRun, { top: 49.2 }]}>{account.handle}</Text>
+            </>
+          ) : (
+            <Text style={styles.cardRun}>{account.handle}</Text>
+          )}
           <View style={styles.cardChevron}>
             <InstagramMark size={22} />
           </View>
@@ -36,11 +60,11 @@ export const LoginScreen: React.FC<Props> = ({ variant, onVariant, onPick, onLog
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Switch account"
+          accessibilityLabel="Use different account"
           onPress={() => onVariant('generic')}
           style={styles.pickerBottomRun}
         >
-          <Text style={styles.pickerBottomRunText}>Switch account</Text>
+          <Text style={styles.pickerBottomRunText}>Use different account</Text>
         </Pressable>
       </View>
     );
@@ -114,7 +138,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface, width: frame.width, height: frame.height },
 
   langKey: { position: 'absolute', left: 142.6, top: 8, width: 108.1, height: 21.8, alignItems: 'center', justifyContent: 'center' },
-  langRun: { fontSize: 13.5, lineHeight: 21.8, color: colors.fieldInk, fontFamily: 'ThreadsBody' },
+  langRun: { fontSize: 13.5, lineHeight: 21.8, color: colors.fieldInk, fontFamily: fonts.body },
 
   markPlate: { position: 'absolute', left: 16, top: 125.2, width: 361, height: 60, alignItems: 'center', justifyContent: 'center' },
 
@@ -152,7 +176,7 @@ const styles = StyleSheet.create({
     fontSize: type.body,
     lineHeight: 18.9,
     color: colors.ink,
-    fontFamily: 'ThreadsBody',
+    fontFamily: fonts.body,
     backgroundColor: 'transparent',
   },
   passBox: { position: 'absolute', left: 32, top: 401, width: 292.9, height: 19.6 },
@@ -167,7 +191,7 @@ const styles = StyleSheet.create({
     fontSize: type.body,
     lineHeight: 18.9,
     color: colors.ink,
-    fontFamily: 'ThreadsBody',
+    fontFamily: fonts.body,
     backgroundColor: 'transparent',
   },
 
@@ -182,27 +206,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  loginRun: { fontSize: type.body, lineHeight: 21.1, fontWeight: weight.soft, color: colors.loginInk, fontFamily: 'ThreadsBody' },
+  loginRun: { fontSize: type.body, lineHeight: 21.1, fontWeight: weight.soft, color: colors.loginInk, fontFamily: fonts.body },
 
   forgotKey: { position: 'absolute', left: 118.6, top: 501.4, width: 155.7, height: 36, alignItems: 'center', justifyContent: 'center' },
-  forgotRun: { marginTop: 1.3, fontSize: 14.6, lineHeight: 25.1, fontWeight: weight.medium, letterSpacing: 0.11, color: colors.forgotInk, fontFamily: 'ThreadsBody' },
+  forgotRun: { marginTop: 1.3, fontSize: 14.6, lineHeight: 25.1, fontWeight: weight.medium, letterSpacing: 0.11, color: colors.forgotInk, fontFamily: fonts.body },
 
   metaKey: { position: 'absolute', left: 166.7, top: 748.2, width: 60, height: 12, alignItems: 'center', justifyContent: 'center' },
 
-  wordmarkBlock: { position: 'absolute', left: 64.4, top: 209.8, width: 264, height: 80, alignItems: 'center', justifyContent: 'center' },
+  wordmarkBlock: { position: 'absolute', left: 64.4, top: 210.0, width: 264, height: 80, alignItems: 'center', justifyContent: 'center' },
   card: {
     position: 'absolute',
     left: 24,
-    top: 366.1,
-    width: 344.7,
-    height: 92,
+    top: 366.4,
+    width: 345,
+    height: 92.1,
     borderRadius: radius.card,
     backgroundColor: colors.surface,
     ...shadow.card,
   },
   cardMark: { position: 'absolute', left: 22.2, top: 22.2, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
-  cardRun: { position: 'absolute', left: 78.2, top: 37.5, fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
-  cardChevron: { position: 'absolute', left: 292.7, top: 22.2, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
-  pickerBottomRun: { position: 'absolute', left: 24, top: 722.5, width: 345, height: 48, alignItems: 'center', justifyContent: 'center' },
-  pickerBottomRunText: { fontSize: type.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  cardRun: { position: 'absolute', left: 78.2, top: 37.5, fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body },
+  cardChevron: { position: 'absolute', left: 293, top: 22.2, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
+  pickerBottomRun: { position: 'absolute', left: 24, top: 723.1, width: 345, height: 48, alignItems: 'center', justifyContent: 'center' },
+  cardSubRun: { position: 'absolute', left: 78.2, fontSize: type.body, color: colors.secondary, fontFamily: fonts.body },
+  consent: { position: 'absolute', left: 30.2, top: 305.3, width: 332.6, fontSize: type.caption, lineHeight: 15.5, textAlign: 'center', color: colors.secondary, fontFamily: fonts.body },
+  consentLink: { color: colors.ink, fontWeight: weight.medium },
+  pickerBottomRunText: { fontSize: type.body, color: colors.secondary, fontFamily: fonts.body },
 });

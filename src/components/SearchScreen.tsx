@@ -3,7 +3,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { Avatar, BottomNav, TopBar, Verified } from './Chrome';
 import { ChevronDownIcon, ChevronRightIcon, SearchIcon, VerifiedIcon } from './Icons';
 import { searchAccounts, suggestions, trending } from '../data';
-import { colors, frame, type, weight } from '../tokens';
+import { colors, fonts, frame, type, weight } from '../tokens';
 
 
 const SEP = '\ufffd';
@@ -233,19 +233,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: weight.medium,
     color: colors.ink,
-    fontFamily: 'ThreadsBody',
+    fontFamily: fonts.body,
     backgroundColor: 'transparent',
     outlineStyle: 'none',
   } as never,
 
-  sectionTitle: { position: 'absolute', left: 16, top: 120.1, lineHeight: 21, fontSize: 18.9, fontWeight: weight.bold, color: colors.markerInk, fontFamily: 'ThreadsBody' },
+  sectionTitle: { position: 'absolute', left: 16, top: 120.1, lineHeight: 21, fontSize: 18.9, fontWeight: weight.bold, color: colors.markerInk, fontFamily: fonts.body },
   sectionMarker: { position: 'absolute', left: 12.5, top: 120.6, width: 130, height: 19, backgroundColor: colors.marker },
-  subtitle: { position: 'absolute', left: 16, top: 145.1, lineHeight: 17, fontSize: 13.5, color: colors.markerInk, fontFamily: 'ThreadsBody' },
+  subtitle: { position: 'absolute', left: 16, top: 145.1, lineHeight: 17, fontSize: 13.5, color: colors.markerInk, fontFamily: fonts.body },
   subtitleMask: { position: 'absolute', left: 269.5, top: 145.1, width: 22, height: 17, backgroundColor: colors.page },
   subtitleChevron: { position: 'absolute', left: 277.9, top: 147, width: 11, height: 11, alignItems: 'center', justifyContent: 'center' },
 
-  trendTitle: { position: 'absolute', left: 16, lineHeight: 18.3, fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
-  trendSummary: { position: 'absolute', left: 16, lineHeight: 18.3, fontSize: type.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  trendTitle: { position: 'absolute', left: 16, lineHeight: 18.3, fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body },
+  trendSummary: { position: 'absolute', left: 16, lineHeight: 18.3, fontSize: type.body, color: colors.secondary, fontFamily: fonts.body },
   thumb: { position: 'absolute', left: 322.8, width: 54.2, height: 64, borderRadius: 12, overflow: 'hidden', backgroundColor: colors.surfaceAlt },
   thumbImage: { width: '100%', height: '100%' },
 
@@ -253,18 +253,18 @@ const styles = StyleSheet.create({
   sectionRule: { position: 'absolute', left: 0, right: 0, top: 639.7, height: 1, backgroundColor: colors.hairlineStrong },
 
   showMoreKey: { position: 'absolute', left: 16, top: 602.2, height: 17.5, justifyContent: 'center' },
-  showMoreRun: { lineHeight: 17.5, fontSize: type.body, fontWeight: weight.semibold, letterSpacing: -0.2, color: colors.ink, fontFamily: 'ThreadsBody' },
+  showMoreRun: { lineHeight: 17.5, fontSize: type.body, fontWeight: weight.semibold, letterSpacing: -0.2, color: colors.ink, fontFamily: fonts.body },
   showMoreChevron: { position: 'absolute', left: 93.9, top: 605.4, width: 11, height: 11, alignItems: 'center', justifyContent: 'center' },
 
-  suggestionCaption: { position: 'absolute', left: 16, top: 656.1, lineHeight: 17.5, fontSize: type.body, fontWeight: weight.strong, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  suggestionCaption: { position: 'absolute', left: 16, top: 656.1, lineHeight: 17.5, fontSize: type.body, fontWeight: weight.strong, color: colors.secondary, fontFamily: fonts.body },
   suggestionRow: { position: 'absolute', left: 0, top: 0, width: frame.width, height: 0 },
   suggestionAvatar: { position: 'absolute', left: 16, top: 691 },
-  suggestionHandle: { position: 'absolute', lineHeight: 17.5, fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
+  suggestionHandle: { position: 'absolute', lineHeight: 17.5, fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body },
   suggestionBadge: { position: 'absolute', left: 168.8, top: 691.4, width: 14.2, height: 14.2 },
-  suggestionName: { position: 'absolute', lineHeight: 18.3, fontSize: type.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  suggestionName: { position: 'absolute', lineHeight: 18.3, fontSize: type.body, color: colors.secondary, fontFamily: fonts.body },
   followPlate: { position: 'absolute', left: 280.9, top: 685.2, width: 96.1, height: 36.8, borderRadius: 18.4, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
   followPlateOn: { backgroundColor: colors.page, borderWidth: 1, borderColor: colors.border },
-  followRun: { fontSize: type.body, fontWeight: weight.semibold, color: colors.onDark, fontFamily: 'ThreadsBody' },
+  followRun: { fontSize: type.body, fontWeight: weight.semibold, color: colors.onDark, fontFamily: fonts.body },
   followRunOn: { color: colors.ink },
 
   resultsPill: { position: 'absolute', left: 48, top: 10.2, width: 328.6, height: 43.6, borderRadius: 21.8, backgroundColor: colors.field },
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     fontSize: type.body,
     color: colors.menuInk,
-    fontFamily: 'ThreadsBody',
+    fontFamily: fonts.body,
     backgroundColor: 'transparent',
     outlineStyle: 'none',
   } as never,
@@ -288,8 +288,8 @@ const styles = StyleSheet.create({
   resultRow: { position: 'absolute', left: 0, top: 0, width: frame.width, height: 0 },
   resultAvatar: { position: 'absolute', left: 16 },
   magnifierDisc: { backgroundColor: colors.field, alignItems: 'center', justifyContent: 'center' },
-  resultHandle: { position: 'absolute', left: 68, lineHeight: 17.5, fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
-  resultName: { position: 'absolute', left: 68, lineHeight: 17.5, fontSize: type.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  resultHandle: { position: 'absolute', left: 68, lineHeight: 17.5, fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body },
+  resultName: { position: 'absolute', left: 68, lineHeight: 17.5, fontSize: type.body, color: colors.secondary, fontFamily: fonts.body },
   resultBadge: { position: 'absolute', width: 14.2, height: 14.2 },
 });
 

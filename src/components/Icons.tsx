@@ -37,9 +37,9 @@ export const SearchIcon: React.FC<IconProps> = ({ size = 24, color = colors.ink,
   </Svg>
 );
 
-export const BellIcon: React.FC<IconProps> = ({ size = 24, color = colors.ink, strokeWidth = 2 }) => (
+export const BellIcon: React.FC<IconProps> = ({ size = 24, color = colors.ink, strokeWidth = 2, filled = false }) => (
   <Svg {...base(size, color, strokeWidth)}>
-    <Path d="M6.4 16.4v-5.1a5.6 5.6 0 0 1 11.2 0v5.1l1.4 1.6H5z" />
+    <Path d="M6.4 16.4v-5.1a5.6 5.6 0 0 1 11.2 0v5.1l1.4 1.6H5z" fill={filled ? color : 'none'} />
     <Path d="M10.4 20.1a1.9 1.9 0 0 0 3.2 0" />
   </Svg>
 );

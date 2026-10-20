@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Image, PanResponder, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { ActionRow, ActionSheet, Avatar, BottomNav, Hairline, PostHeader, TopBar } from './Chrome';
+import { ActionRow, ActionSheet, Avatar, BottomNav, PostHeader, TopBar } from './Chrome';
 import { formatCount, relativeTime, type Post } from '../data';
-import { colors, feedRows, frame, radius, rhythm, space, tracking, type, weight } from '../tokens';
+import { colors, feedRows, fonts, frame, radius, rhythm, space, tracking, type, weight } from '../tokens';
 
 
 type Props = {
@@ -74,7 +74,7 @@ export const FeedScreen: React.FC<Props> = ({ now, posts, liked, onToggleLike, o
     <View style={styles.screen}>
       <TopBar left="menu" wordmark right={['search']} onRight={(k) => (k === 'search' ? onNavigate('search') : undefined)} />
       <ComposerEntry onPress={() => onNavigate('create')} />
-      <Hairline top={FEED_TOP} />
+      <View pointerEvents="none" style={styles.feedRule} />
       {refreshing || pull > 0 ? (
         <View
           accessibilityRole="progressbar"
@@ -176,7 +176,9 @@ export const PostCard: React.FC<{
         {post.link ? (
           <>
             {' '}
-            <Text style={styles.link}>{flushLink(post.link)}</Text>
+            <Text accessibilityRole="link" accessibilityLabel={flushLink(post.link)} onPress={onOpen} style={styles.linkTarget}>
+              <Text style={styles.link}>{flushLink(post.link)}</Text>
+            </Text>
           </>
         ) : null}
       </Text>
@@ -221,17 +223,19 @@ const styles = StyleSheet.create({
   scroller: { flex: 1 },
   pullRow: { position: 'absolute', left: 0, width: frame.width, height: 24, alignItems: 'center', justifyContent: 'center', zIndex: 30 },
   spinner: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: colors.disabled, borderTopColor: colors.secondary },
-  composerHandle: { position: 'absolute', left: space.gutter, fontSize: type.body, fontWeight: weight.medium, color: colors.ink, letterSpacing: -0.27, fontFamily: 'ThreadsBody' },
-  composerPrompt: { position: 'absolute', left: space.gutter, width: 332.7, fontSize: type.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  composerHandle: { position: 'absolute', left: space.gutter, fontSize: type.body, fontWeight: weight.medium, color: colors.ink, letterSpacing: -0.27, fontFamily: fonts.body },
+  composerPrompt: { position: 'absolute', left: space.gutter, width: 332.7, fontSize: type.body, color: colors.secondary, fontFamily: fonts.body },
   bodyBox: { marginLeft: space.gutter, width: 320.7 },
   bodyLift: { marginTop: -4.5 },
-  body: { fontSize: type.body, lineHeight: type.bodyLine, letterSpacing: tracking.body, color: colors.ink, fontFamily: 'ThreadsBody' },
+  body: { fontSize: type.body, lineHeight: type.bodyLine, letterSpacing: tracking.body, color: colors.ink, fontFamily: fonts.body },
   link: { color: colors.verified },
+  linkTarget: { marginLeft: -0.8, paddingTop: 14.3, paddingBottom: 8.5 },
   mediaBlock: { position: 'relative', width: frame.width, height: 396, marginTop: rhythm.post.bodyToMedia },
   mediaPlate: { position: 'absolute', left: 0, top: 0, width: frame.width, height: 396 },
   media: { position: 'absolute', left: space.gutter, top: 0, width: 316.7, height: 396, borderRadius: radius.media, overflow: 'hidden', backgroundColor: colors.surfaceAlt },
   mediaImage: { width: '100%', height: '100%' },
   actionPlate: { position: 'relative', width: frame.width, height: 43.3 },
   actionInset: { position: 'relative', left: 0, top: 0, width: frame.width, height: 43.3 },
+  feedRule: { position: 'absolute', left: 0, right: 0, top: 115, height: 1, backgroundColor: colors.hairline, transformOrigin: 'top', transform: [{ translateY: 0.72 }, { scaleY: 0.728 }] },
   separator: { height: 1, backgroundColor: colors.hairline },
 });

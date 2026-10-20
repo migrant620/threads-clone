@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { BottomNav, TopBar, Verified } from './Chrome';
 import { BellIcon, CloseIcon, MoreIcon } from './Icons';
-import { colors, frame, tracking, weight } from '../tokens';
+import { colors, fonts, frame, tracking, weight } from '../tokens';
 import { relativeTime } from '../data';
 
 
@@ -135,32 +135,32 @@ const styles = StyleSheet.create({
   chip: { position: 'absolute', top: 64, height: 33.2, borderRadius: 16.6, alignItems: 'center', justifyContent: 'center' },
   chipOn: { backgroundColor: colors.chip },
   chipOff: { borderWidth: 1, borderColor: colors.hairlineStrong },
-  chipRun: { fontSize: 15, lineHeight: 17.5, letterSpacing: 0, fontWeight: weight.medium, color: colors.ink, fontFamily: 'ThreadsBody' },
+  chipRun: { fontSize: 15, lineHeight: 17.5, letterSpacing: 0, fontWeight: weight.medium, color: colors.ink, fontFamily: fonts.body },
 
-  sectionLabel: { position: 'absolute', left: 16, top: 115.7, fontSize: 15, lineHeight: 17.5, letterSpacing: 0, fontWeight: weight.medium, color: colors.ink, fontFamily: 'ThreadsBody' },
+  sectionLabel: { position: 'absolute', left: 16, top: 115.7, fontSize: 15, lineHeight: 17.5, letterSpacing: 0, fontWeight: weight.medium, color: colors.ink, fontFamily: fonts.body },
 
   bannerAvatar: { position: 'absolute', left: 16, top: 153.2, width: 35.7, height: 35.7, borderRadius: 17.85 },
   bannerBody: { top: 153.2 },
 
   rowHairline: { position: 'absolute', left: 68, width: frame.width - 68, height: 1, backgroundColor: 'rgb(217,217,217)' },
 
-  body: { position: 'absolute', left: 68, width: 308.9, fontSize: 15.5, lineHeight: 19.3, letterSpacing: tracking.body, color: colors.ink, fontFamily: 'ThreadsBody' },
+  body: { position: 'absolute', left: 68, width: 308.9, fontSize: 15.5, lineHeight: 19.3, letterSpacing: tracking.body, color: colors.ink, fontFamily: fonts.body },
 
   avatarPlate: { position: 'absolute', left: 10.2, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   avatarImage: { width: 35.7, height: 35.7, borderRadius: 17.85 },
 
   authorRun: { position: 'absolute', left: 68, width: 89.9, height: 19.0 },
-  handle: { position: 'absolute', left: 0, top: 1.1, lineHeight: 17.5, fontSize: 15, letterSpacing: tracking.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: 'ThreadsBody' },
+  handle: { position: 'absolute', left: 0, top: 1.1, lineHeight: 17.5, fontSize: 15, letterSpacing: tracking.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body },
   badgeBox: { position: 'absolute', left: 53.9, top: 2.15 },
-  timeRun: { position: 'absolute', left: 73.3, top: 1.1, lineHeight: 17.5, fontSize: 15, letterSpacing: tracking.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  timeRun: { position: 'absolute', left: 73.3, top: 1.1, lineHeight: 17.5, fontSize: 15, letterSpacing: tracking.body, color: colors.secondary, fontFamily: fonts.body },
 
   overflowPlate: { position: 'absolute', left: 345, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   moreKey: { width: 16, height: 16, alignItems: 'center', justifyContent: 'center' },
 
   footer: { position: 'absolute', left: 0, top: 673.9, width: frame.width, height: 47.7, backgroundColor: colors.footer },
   footerGlyph: { position: 'absolute', left: 76.1, top: 16.4 },
-  footerRun: { position: 'absolute', left: 97.2, top: 17.1, fontSize: 13.3, lineHeight: 14.2, letterSpacing: tracking.body, color: colors.secondary, fontFamily: 'ThreadsBody' },
+  footerRun: { position: 'absolute', left: 97.2, top: 17.1, fontSize: 13.3, lineHeight: 14.2, letterSpacing: tracking.body, color: colors.secondary, fontFamily: fonts.body },
   turnOnKey: { position: 'absolute', left: 247.8, top: 0.4, width: 48, height: 47.7, alignItems: 'center', justifyContent: 'center' },
-  turnOnRun: { marginTop: 1.5, fontSize: 13.3, lineHeight: 17.5, letterSpacing: -0.03, fontWeight: weight.bold, color: colors.ink, fontFamily: 'ThreadsBody' },
+  turnOnRun: { marginTop: 1.5, fontSize: 13.3, lineHeight: 17.5, letterSpacing: -0.03, fontWeight: weight.bold, color: colors.ink, fontFamily: fonts.body },
   dismissKey: { position: 'absolute', left: 341, top: 0, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
 });
