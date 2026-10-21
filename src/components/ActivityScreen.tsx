@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { BottomNav, TopBar, Verified } from './Chrome';
-import { BellIcon, CloseIcon, MoreIcon } from './Icons';
+import { AccountsNoticeMark, BellIcon, CloseIcon, MoreIcon } from './Icons';
 import { colors, fonts, frame, tracking, weight } from '../tokens';
 import { relativeTime } from '../data';
 
@@ -75,7 +75,9 @@ export const ActivityScreen: React.FC<Props> = ({ now, onNavigate, notifications
       <Text style={styles.sectionLabel}>New</Text>
       <RowHairline top={117.5} />
 
-      <Image source={require('../../assets/images/a01.webp')} style={styles.bannerAvatar} />
+      <View style={[styles.bannerAvatar, styles.noticeDisc]}>
+        <AccountsNoticeMark size={35.7} />
+      </View>
       <Text style={[styles.body, styles.bannerBody]}>{`${BANNER} ${bannerAge}`}</Text>
       <RowHairline top={205.2} />
 
@@ -148,6 +150,7 @@ const styles = StyleSheet.create({
 
   avatarPlate: { position: 'absolute', left: 10.2, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   avatarImage: { width: 35.7, height: 35.7, borderRadius: 17.85 },
+  noticeDisc: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.hairlineStrong, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
 
   authorRun: { position: 'absolute', left: 68, width: 89.9, height: 19.0 },
   handle: { position: 'absolute', left: 0, top: 1.1, lineHeight: 17.5, fontSize: 15, letterSpacing: tracking.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body },
