@@ -4,7 +4,7 @@ import type { ImageSourcePropType } from 'react-native';
 export type Post = {
   id: string;
   handle: string;
-  avatar: ImageSourcePropType;
+  avatar: ImageSourcePropType | null;
   verified: boolean;
   postedAt: number;
   body: string;
@@ -75,6 +75,23 @@ export const account = {
   bio: '',
   followers: '0',
   following: '11',
+};
+
+export const buildOwnThread = (segments: string[], now: number, seq: number): Post[] => {
+  const parts = segments.map((s) => s.trim()).filter(Boolean);
+  return parts.map((body, i) => ({
+    id: `own-${seq}-${i}`,
+    handle: account.handle,
+    avatar: account.avatar,
+    verified: false,
+    postedAt: now,
+    body,
+    part: parts.length > 1 ? { index: i + 1, total: parts.length } : undefined,
+    likes: 0,
+    replies: 0,
+    reposts: 0,
+    mine: true,
+  }));
 };
 
 export const buildFeed = (now: number): Post[] => [
