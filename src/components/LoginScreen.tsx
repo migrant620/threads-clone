@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { InstagramMark, MetaLogo, WordmarkGlyph, WordmarkPlate } from './Icons';
+import { ChevronRightIcon, InstagramMark, MetaLogo, WordmarkGlyph, WordmarkPlate } from './Icons';
 import { account } from '../data';
 import { colors, fonts, frame, radius, shadow, type, weight } from '../tokens';
 
 
-export type LoginVariant = 'picker' | 'generic' | 'join';
+export type LoginVariant = 'picker' | 'generic' | 'join' | 'launch';
 
 type Props = {
   variant: LoginVariant;
@@ -20,10 +20,32 @@ export const LoginScreen: React.FC<Props> = ({ variant, onVariant, onPick, onJoi
   const [user, setUser] = React.useState('');
   const [pass, setPass] = React.useState('');
 
+  if (variant === 'launch') {
+    return (
+      <View style={[styles.screen, styles.sheetGround]}>
+        <View style={[styles.wordmarkBlock, { top: 255.1 }]}>
+          <WordmarkPlate width={264} height={80} />
+        </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="Log in with Instagram" onPress={() => onVariant('join')} style={[styles.card, { top: 381.4 }]}>
+          <View style={styles.cardMark}>
+            <InstagramMark size={48} />
+          </View>
+          <Text style={[styles.cardRun, { left: 88.1 }]}>Log in with Instagram</Text>
+          <View style={styles.cardChevron}>
+            <ChevronRightIcon size={19.3} color={colors.secondary} />
+          </View>
+        </Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel="Create Instagram account" onPress={() => onVariant('join')} style={[styles.pickerBottomRun, { top: 704.9 }]}>
+          <Text style={styles.pickerBottomRunText}>Create Instagram account</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   if (picker || variant === 'join') {
     const join = variant === 'join';
     return (
-      <View style={styles.screen}>
+      <View style={[styles.screen, styles.sheetGround]}>
         <View style={[styles.wordmarkBlock, join ? { top: 179.0 } : null]}>
           <WordmarkPlate width={264} height={80} />
         </View>
@@ -54,7 +76,7 @@ export const LoginScreen: React.FC<Props> = ({ variant, onVariant, onPick, onJoi
             <Text style={styles.cardRun}>{account.handle}</Text>
           )}
           <View style={styles.cardChevron}>
-            <InstagramMark size={22} />
+            <ChevronRightIcon size={19.3} color={colors.secondary} />
           </View>
         </Pressable>
 
@@ -136,6 +158,7 @@ export const LoginScreen: React.FC<Props> = ({ variant, onVariant, onPick, onJoi
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface, width: frame.width, height: frame.height },
+  sheetGround: { backgroundColor: colors.loginGround },
 
   langKey: { position: 'absolute', left: 142.6, top: 8, width: 108.1, height: 21.8, alignItems: 'center', justifyContent: 'center' },
   langRun: { fontSize: 13.5, lineHeight: 21.8, color: colors.fieldInk, fontFamily: fonts.body },

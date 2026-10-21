@@ -8,6 +8,7 @@ import {
   ChevronRightIcon,
   CircledMoreIcon,
   CloseIcon,
+  DefaultAvatar,
   DraftsIcon,
   FiltersIcon,
   GlobeIcon,
@@ -165,11 +166,16 @@ export const WordmarkRow: React.FC = () => (
 );
 
 
-export const Avatar: React.FC<{ source: unknown; size?: number; label?: string }> = ({ source, size = space.avatar, label }) => (
-  <Pressable accessibilityRole="button" accessibilityLabel={label} style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden', backgroundColor: colors.surfaceAlt }}>
-    <Image source={source as never} style={{ width: size, height: size, borderRadius: size / 2 }} />
-  </Pressable>
-);
+export const Avatar: React.FC<{ source: unknown; size?: number; label?: string; onPress?: () => void }> = ({ source, size = space.avatar, label, onPress }) =>
+  source == null ? (
+    <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={{ width: size, height: size }}>
+      <DefaultAvatar size={size} />
+    </Pressable>
+  ) : (
+    <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden', backgroundColor: colors.surfaceAlt }}>
+      <Image source={source as never} style={{ width: size, height: size, borderRadius: size / 2 }} />
+    </Pressable>
+  );
 
 export const Verified: React.FC<{ size?: number }> = ({ size = iconSize.verified }) => (
   <Pressable accessibilityRole="button" accessibilityLabel="Verified" style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
@@ -185,10 +191,13 @@ export const PostHeader: React.FC<{
   row: { handleLeft: number; handleWidth: number; timeLeft: number; verifiedLeft: number | null; verifiedGlyphLeft?: number };
   onOpen?: () => void;
   openLabel?: string;
-}> = ({ avatar, handle, verified, time, row, onOpen, openLabel = '' }) => (
+  onAvatarPress?: () => void;
+  followBadge?: boolean;
+}> = ({ avatar, handle, verified, time, row, onOpen, openLabel = '', onAvatarPress, followBadge }) => (
   <View style={{ height: rhythm.post.headerToBody }}>
-    <View style={{ position: 'absolute', left: space.avatarLeft, top: 13.4 }}>
-      <Avatar source={avatar} label={`${handle} profile photo`} />
+    <View style={{ position: 'absolute', left: space.avatarLeft, top: 13.4, zIndex: onAvatarPress ? 2 : undefined }}>
+      <Avatar source={avatar} label={`${handle} profile photo`} onPress={onAvatarPress} />
+      {followBadge ? <FollowBadge /> : null}
     </View>
     <View
       pointerEvents="none"
@@ -256,6 +265,15 @@ export const PostHeader: React.FC<{
       <MoreKey top={20.4} left={16} />
     </Pressable>
     <Pressable accessibilityRole="button" accessibilityLabel={openLabel} onPress={onOpen} style={styles.headerRow} />
+  </View>
+);
+
+export const FollowBadge: React.FC = () => (
+  <View pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants" aria-hidden style={styles.followBadge}>
+    <View style={styles.followBadgeDisc}>
+      <View style={styles.followBadgeBarH} />
+      <View style={styles.followBadgeBarV} />
+    </View>
   </View>
 );
 
@@ -463,6 +481,10 @@ const styles = StyleSheet.create({
   overflowPlate: { position: 'absolute', left: 345, top: -5, width: 48, height: 48, backgroundColor: 'transparent' },
   time: { fontSize: type.body, color: colors.secondary, fontFamily: fonts.body },
   ghost: { opacity: 0 },
+  followBadge: { position: 'absolute', left: 39.6 - 9.9, top: 39.65 - 9.9, width: 19.8, height: 19.8, borderRadius: 9.9, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' },
+  followBadgeDisc: { width: 17.2, height: 17.2, borderRadius: 8.6, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
+  followBadgeBarH: { position: 'absolute', width: 9.1, height: 1.8, borderRadius: 0.9, backgroundColor: colors.onDark },
+  followBadgeBarV: { position: 'absolute', width: 1.8, height: 9.1, borderRadius: 0.9, backgroundColor: colors.onDark },
   visibleRun: { position: 'absolute', left: space.gutter, top: 0, right: 56, height: 48, flexDirection: 'row', alignItems: 'center' },
   visibleBadge: { marginLeft: 4 },
   visibleTime: { marginLeft: 6 },

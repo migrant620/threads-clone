@@ -14,12 +14,17 @@ export type Post = {
   replies: number;
   reposts: number;
   mine?: boolean;
+  suggestFollow?: boolean;
+  topic?: string;
+  part?: { index: number; total: number };
+  gallery?: ImageSourcePropType[];
+  quote?: { handle: string; avatar: ImageSourcePropType; postedAt: number; body: string };
 };
 
 export type ReplyNode = {
   id: string;
   handle: string;
-  avatar: ImageSourcePropType;
+  avatar: ImageSourcePropType | null;
   verified: boolean;
   postedAt: number;
   body: string;
@@ -66,7 +71,7 @@ const p = (n: number): ImageSourcePropType => {
 export const account = {
   handle: 'm620ui',
   display: 'M620',
-  avatar: a(1),
+  avatar: null as ImageSourcePropType | null,
   bio: '',
   followers: '0',
   following: '11',
@@ -93,6 +98,7 @@ export const buildFeed = (now: number): Post[] => [
     verified: true,
     postedAt: now - 20 * 60 * 60 * 1000,
     body: 'The fog never lifted off the bay today',
+    suggestFollow: true,
     likes: 1418,
     replies: 96,
     reposts: 12,
@@ -120,6 +126,27 @@ export const buildFeed = (now: number): Post[] => [
     likes: 89,
     replies: 7,
     reposts: 1,
+  },
+  {
+    id: 'p5',
+    handle: 'tidewatch',
+    avatar: a(1),
+    verified: false,
+    postedAt: now - 26 * 60 * 60 * 1000,
+    topic: 'Harbour market weekend',
+    body: 'Back at the old depot yard for the market this morning.\nForty stalls, the same late closing time,\nand the coffee cart is in its usual corner.',
+    part: { index: 1, total: 2 },
+    gallery: [p(3), p(4)],
+    quote: {
+      handle: 'tidewatch',
+      avatar: a(1),
+      postedAt: now - 2 * 24 * 60 * 60 * 1000,
+      body: 'The market is back on Friday. Same yard, same hours, a few new stalls.',
+    },
+    suggestFollow: true,
+    likes: 64,
+    replies: 5,
+    reposts: 2,
   },
 ];
 
@@ -231,6 +258,24 @@ export const trending: Trend[] = [
     topic: 'Lantern festival lineup',
     summary: 'The full programme is out, with the river walk closing an hour before the first set.',
     thumb: p(4),
+  },
+];
+
+export const moreTrending: Trend[] = [
+  {
+    id: 'tr6',
+    topic: 'Tide tables for the spring',
+    summary: 'The new tables are out, with the lowest tides of the year falling on two weekend mornings.',
+  },
+  {
+    id: 'tr7',
+    topic: 'Lighthouse open day',
+    summary: 'The keepers open the tower to visitors on Sunday, with the stairs closing at four.',
+  },
+  {
+    id: 'tr8',
+    topic: 'Pier lights replaced',
+    summary: 'The old lamps along the north pier are gone, and the new ones run on the same timer.',
   },
 ];
 

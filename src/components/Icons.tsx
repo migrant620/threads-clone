@@ -1,5 +1,6 @@
 import * as React from 'react';
-import Svg, { Circle, G, Path, Rect, Line, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, ClipPath, Defs, G, Path, Rect, Line, Text as SvgText } from '../svg';
+import { View } from 'react-native';
 import { colors } from '../tokens';
 
 
@@ -296,24 +297,19 @@ export const WordmarkLockup: React.FC<{ width?: number; height?: number; color?:
 );
 
 export const WordmarkPlate: React.FC<{ width?: number; height?: number; color?: string }> = ({
-  width = 120,
-  height = 23,
+  width = 264,
+  height = 80,
   color = colors.ink,
-}) => (
-  <Svg width={width} height={height} viewBox="0 0 120 23">
-    <Circle cx="11.5" cy="11.5" r="9.6" fill="none" stroke={color} strokeWidth="2.4" />
-    <Path
-      d="M12 4.4c-3.9 0-6.3 2.2-6.3 6 0 3.4 2.3 5.6 5.7 5.6 3.9 0 6.2-2.4 6.2-6.4 0-3.4-2.2-5.6-5.7-5.6-2.3 0-4.1.8-5.3 2.2"
-      fill="none"
-      stroke={color}
-      strokeWidth="2.1"
-      strokeLinecap="round"
-    />
-    {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-      <Rect key={i} x={27 + i * 13.2} y={i % 2 ? 6.4 : 7.6} width={2.4} height={i % 2 ? 10 : 8.8} fill={color} rx={1.1} />
-    ))}
-  </Svg>
-);
+}) => {
+  const k = (1.86 * width) / 264;
+  return (
+    <View style={{ width, height }}>
+      <View style={{ position: 'absolute', left: (19.4 * width) / 264, top: (19.3 * height) / 80 }}>
+        <WordmarkLockup width={119 * k} height={22.9 * k} color={color} />
+      </View>
+    </View>
+  );
+};
 
 export const InstagramMark: React.FC<{ size?: number; color?: string }> = ({ size = 24, color = colors.igBlue }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24">
@@ -370,5 +366,30 @@ export const InsightsIcon: React.FC<IconProps> = ({ size = 24, color = colors.in
     <Line x1="6.4" y1="19" x2="6.4" y2="12.5" />
     <Line x1="12" y1="19" x2="12" y2="5.6" />
     <Line x1="17.6" y1="19" x2="17.6" y2="9.4" />
+  </Svg>
+);
+
+export const DefaultAvatar: React.FC<{ size?: number }> = ({ size = 48 }) => (
+  <Svg width={size} height={size} viewBox="0 0 48 48">
+    <Defs>
+      <ClipPath id="defaultAvatarDisc">
+        <Circle cx="24" cy="23.95" r="22" />
+      </ClipPath>
+    </Defs>
+    <Circle cx="24" cy="23.95" r="22" fill={colors.avatarGround} />
+    <G clipPath="url(#defaultAvatarDisc)" fill={colors.avatarFigure}>
+      <Circle cx="24" cy="19.75" r="8.7" />
+      <Circle cx="24" cy="47.25" r="17.2" />
+    </G>
+    <Circle cx="24" cy="23.95" r="21.82" fill="none" stroke={colors.avatarRing} strokeWidth={0.36} />
+  </Svg>
+);
+
+export const AccountsNoticeMark: React.FC<{ size?: number }> = ({ size = 35.7 }) => (
+  <Svg width={size} height={size} viewBox="0 0 35.7 35.7">
+    <G transform="translate(2.38 7.97) scale(1.774)" fill="none" stroke="#0081FA" strokeWidth={1.5} strokeLinecap="round">
+      <Path d="M6.4 10.2c-2 0-3.3-1.5-3.3-4.1S4.4 1.8 6.4 1.8c1.6 0 2.6.9 3.4 2.6l.9 2c.7 1.5 1.3 2.2 2.1 2.2 1.2 0 1.9-1.1 1.9-3.2 0-2.4-.9-3.6-2.7-3.6-1.1 0-2 .4-2.8 1.3" />
+      <Path d="M12.2 7.6c-.6 1.6-1.5 2.6-2.8 2.6-1.6 0-2.5-1.2-3.3-3.3L5.2 4.7" />
+    </G>
   </Svg>
 );

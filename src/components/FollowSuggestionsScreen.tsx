@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path } from '../svg';
 import { CloseIcon } from './Icons';
 import { onboardingSuggestions } from '../data';
 import { colors, fonts, frame, weight } from '../tokens';

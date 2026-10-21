@@ -143,6 +143,8 @@ export default function App() {
             onNavigate={onNavigate}
             scrollRef={feedScroll}
             onScrollOffset={(y) => (feedOffset.current = y)}
+            followed={followed}
+            onToggleFollow={toggleFollow}
           />
         ) : null}
 
@@ -201,7 +203,7 @@ export default function App() {
         accessibilityLabel="Show login screen"
         onPress={() => {
           if (screen === 'login') {
-            setLoginVariant((v) => (v === 'generic' ? 'picker' : v === 'picker' ? 'join' : 'generic'));
+            setLoginVariant((v) => (v === 'generic' ? 'picker' : v === 'picker' ? 'join' : v === 'join' ? 'launch' : 'generic'));
           } else {
             setLoginVariant('generic');
             setScreen('login');

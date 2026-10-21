@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Avatar, BottomNav, TopBar, Verified } from './Chrome';
 import { ChevronDownIcon, ChevronRightIcon, SearchIcon, VerifiedIcon } from './Icons';
-import { searchAccounts, suggestions, trending } from '../data';
+import { moreTrending, searchAccounts, suggestions, trending } from '../data';
 import { colors, fonts, frame, type, weight } from '../tokens';
 
 
@@ -46,7 +46,11 @@ export const SearchScreen: React.FC<Props> = ({ query, onQuery, onBack, onNaviga
 };
 
 
-const Landing: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed, onToggleFollow }) => (
+const Landing: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed, onToggleFollow }) => {
+  const [expanded, setExpanded] = React.useState(false);
+  const rows = expanded ? [...trending, ...moreTrending] : trending;
+  const shift = expanded ? moreTrending.length * TREND_PITCH : 0;
+  return (
   <View style={styles.screen}>
     <TopBar
       left="back"
@@ -62,7 +66,7 @@ const Landing: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed
       <SearchIcon size={14.2} color={colors.secondary} />
     </View>
 
-    <ScrollView style={styles.body} contentContainerStyle={{ height: 700 }} scrollEnabled={false}>
+    <ScrollView style={styles.body} contentContainerStyle={{ height: expanded ? 700 + shift - 37.5 : 700 }} scrollEnabled={expanded}>
       <View style={styles.sectionMarker} />
       <Text style={styles.sectionTitle}>Trending now</Text>
 
@@ -75,7 +79,7 @@ const Landing: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed
         <ChevronRightIcon size={11} color={colors.secondary} />
       </View>
 
-      {trending.map((t, i) => {
+      {rows.map((t, i) => {
         const top = TREND_TOP + i * TREND_PITCH;
         return (
           <View key={t.id} style={{ position: 'absolute', left: 0, top, width: frame.width, height: TREND_PITCH }}>
@@ -98,12 +102,17 @@ const Landing: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed
         );
       })}
 
-      <Pressable accessibilityRole="button" accessibilityLabel="Show more" style={styles.showMoreKey}>
-        <Text style={styles.showMoreRun}>Show more</Text>
-      </Pressable>
-      <View style={styles.showMoreChevron} pointerEvents="none">
-        <ChevronDownIcon size={11} color={colors.ink} />
-      </View>
+      {expanded ? null : (
+        <>
+          <Pressable accessibilityRole="button" accessibilityLabel="Show more" onPress={() => setExpanded(true)} style={styles.showMoreKey}>
+            <Text style={styles.showMoreRun}>Show more</Text>
+          </Pressable>
+          <View style={styles.showMoreChevron} pointerEvents="none">
+            <ChevronDownIcon size={11} color={colors.ink} />
+          </View>
+        </>
+      )}
+      <View pointerEvents="box-none" style={[styles.belowTrends, { top: expanded ? shift - 37.5 : 0 }]}>
 
       <View style={styles.sectionRule} pointerEvents="none" />
 
@@ -113,6 +122,7 @@ const Landing: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed
         followed={!!followed[suggestions[0].handle]}
         onToggleFollow={() => onToggleFollow(suggestions[0].handle)}
       />
+      </View>
     </ScrollView>
 
     <TextInput
@@ -126,7 +136,8 @@ const Landing: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed
 
     <BottomNav current="feed" onSelect={onNavigate} />
   </View>
-);
+  );
+};
 
 const SuggestionRow: React.FC<{ s: (typeof suggestions)[number]; followed: boolean; onToggleFollow: () => void }> = ({ s, followed, onToggleFollow }) => (
   <View style={styles.suggestionRow}>
@@ -250,6 +261,7 @@ const styles = StyleSheet.create({
   thumbImage: { width: '100%', height: '100%' },
 
   trendRule: { position: 'absolute', left: 12, right: 0, top: -13.5, height: 1, backgroundColor: colors.hairlineStrong },
+  belowTrends: { position: 'absolute', left: 0, width: frame.width, height: 777 },
   sectionRule: { position: 'absolute', left: 0, right: 0, top: 639.7, height: 1, backgroundColor: colors.hairlineStrong },
 
   showMoreKey: { position: 'absolute', left: 16, top: 602.2, height: 17.5, justifyContent: 'center' },

@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { Image, PanResponder, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { ActionRow, ActionSheet, Avatar, BottomNav, PostHeader, TopBar } from './Chrome';
-import { formatCount, relativeTime, type Post } from '../data';
+import { ActionRow, ActionSheet, Avatar, BottomNav, FollowBadge, MoreKey, PostHeader, TopBar } from './Chrome';
+import { ChevronRightIcon } from './Icons';
+import { account, formatCount, relativeTime, type Post } from '../data';
 import { colors, feedRows, fonts, frame, radius, rhythm, space, tracking, type, weight } from '../tokens';
 
 
@@ -14,6 +15,8 @@ type Props = {
   onNavigate: (key: string) => void;
   scrollRef?: React.RefObject<ScrollView | null>;
   onScrollOffset?: (y: number) => void;
+  followed?: Record<string, boolean>;
+  onToggleFollow?: (handle: string) => void;
 };
 
 const FEED_TOP = 115.6;
@@ -22,7 +25,7 @@ const TRIGGER = 30;
 const MAX_PULL = 70;
 const REFRESH_MS = 900;
 
-export const FeedScreen: React.FC<Props> = ({ now, posts, liked, onToggleLike, onOpenPost, onNavigate, scrollRef, onScrollOffset }) => {
+export const FeedScreen: React.FC<Props> = ({ now, posts, liked, onToggleLike, onOpenPost, onNavigate, scrollRef, onScrollOffset, followed = {}, onToggleFollow }) => {
   const [pull, setPull] = React.useState(0);
   const [refreshing, setRefreshing] = React.useState(false);
   const offset = React.useRef(0);
@@ -108,6 +111,8 @@ export const FeedScreen: React.FC<Props> = ({ now, posts, liked, onToggleLike, o
               onOpen={() => onOpenPost(p.id)}
               onRepostKey={() => setSheet({ kind: 'repost', id: p.id })}
               onShareKey={() => setSheet({ kind: 'share', id: p.id })}
+              following={!!followed[p.handle]}
+              onFollow={onToggleFollow ? () => onToggleFollow(p.handle) : undefined}
             />
           ))}
         </ScrollView>
@@ -142,7 +147,7 @@ export const FeedScreen: React.FC<Props> = ({ now, posts, liked, onToggleLike, o
 const ComposerEntry: React.FC<{ onPress: () => void }> = ({ onPress }) => (
   <Pressable accessibilityRole="button" accessibilityLabel="Create a new thread" onPress={onPress} style={styles.composerEntry}>
     <View style={{ position: 'absolute', left: space.avatarLeft, top: 54.1 }}>
-      <Avatar source={require('../../assets/images/a01.webp')} label="m620ui profile photo" />
+      <Avatar source={account.avatar} label="m620ui profile photo" />
     </View>
     <Text accessibilityLabel="m620ui" style={[styles.composerHandle, { top: 57.85 }]}>m620ui</Text>
     <Text style={[styles.composerPrompt, { top: 79.35 }]}>What&apos;s new?</Text>
@@ -159,17 +164,28 @@ export const PostCard: React.FC<{
   onRepostKey: () => void;
   onShareKey: () => void;
   index?: number;
-}> = ({ post, now, liked, reposted, onToggleLike, onOpen, onRepostKey, onShareKey, index = 0 }) => (
+  following?: boolean;
+  onFollow?: () => void;
+}> = ({ post, now, liked, reposted, onToggleLike, onOpen, onRepostKey, onShareKey, index = 0, following = false, onFollow }) => {
+  const badge = !!post.suggestFollow && !following;
+  const hasMedia = !!(post.photo || post.gallery || post.quote);
+  return (
   <View style={{ width: frame.width }}>
-    <PostHeader
-      avatar={post.avatar}
-      handle={post.handle}
-      verified={post.verified}
-      time={relativeTime(post.postedAt, now)}
-      row={feedRows[index] ?? feedRows[0]}
-      onOpen={onOpen}
-      openLabel={index === 0 ? 'Open post' : `Open post by ${post.handle}`}
-    />
+    {post.topic ? (
+      <TopicHeader post={post} time={relativeTime(post.postedAt, now)} onOpen={onOpen} badge={badge} onFollow={badge ? onFollow : undefined} />
+    ) : (
+      <PostHeader
+        avatar={post.avatar}
+        handle={post.handle}
+        verified={post.verified}
+        time={relativeTime(post.postedAt, now)}
+        row={feedRows[index] ?? feedRows[0]}
+        onOpen={onOpen}
+        openLabel={index === 0 ? 'Open post' : `Open post by ${post.handle}`}
+        followBadge={badge}
+        onAvatarPress={badge ? onFollow : undefined}
+      />
+    )}
     <View style={[styles.bodyBox, index === 1 ? styles.bodyLift : null]}>
       <Text style={styles.body}>
         {post.body}
@@ -183,6 +199,9 @@ export const PostCard: React.FC<{
         ) : null}
       </Text>
     </View>
+    {post.part ? <PartPill index={post.part.index} total={post.part.total} /> : null}
+    {post.gallery ? <Gallery photos={post.gallery} afterPill={!!post.part} /> : null}
+    {post.quote ? <QuoteCard quote={post.quote} now={now} onOpen={onOpen} /> : null}
     {post.photo ? (
       <View style={styles.mediaBlock}>
         <Pressable accessibilityRole="button" accessibilityLabel="" style={styles.mediaPlate}>
@@ -191,7 +210,7 @@ export const PostCard: React.FC<{
           </Pressable>
         </Pressable>
       </View>
-    ) : (
+    ) : hasMedia ? null : (
       <View style={{ height: rhythm.post.bodyToActions }} />
     )}
     <Pressable accessibilityRole="button" accessibilityLabel="" style={[styles.actionPlate, post.photo ? { marginTop: 0.5 } : null]}>
@@ -212,6 +231,68 @@ export const PostCard: React.FC<{
     <View style={{ height: rhythm.post.actionsToHairline - (post.photo ? 0.5 : 0) }} />
     <View style={styles.separator} />
   </View>
+  );
+};
+
+const TopicHeader: React.FC<{ post: Post; time: string; onOpen: () => void; badge: boolean; onFollow?: () => void }> = ({ post, time, onOpen, badge, onFollow }) => (
+  <View style={{ height: 64.5 }}>
+    <View pointerEvents="none" aria-hidden accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.topicLine}>
+      <Text numberOfLines={1} style={styles.topicHandle}>{post.handle}</Text>
+      <View style={styles.topicChevron}>
+        <ChevronRightIcon size={12.5} color={colors.secondary} />
+      </View>
+      <Text numberOfLines={1} style={styles.topicRun}>{post.topic}</Text>
+    </View>
+    <Text pointerEvents="none" style={styles.topicTime}>{time}</Text>
+    <Pressable accessibilityRole="button" accessibilityLabel={`${post.handle} posted`} onPress={onOpen} style={styles.topicPosted} />
+    <Pressable accessibilityRole="button" accessibilityLabel={post.topic} onPress={onOpen} style={styles.topicKey} />
+    <Pressable accessibilityRole="button" accessibilityLabel={time} onPress={onOpen} style={styles.topicTimeKey} />
+    <Pressable accessibilityRole="button" accessibilityLabel="" style={styles.topicOverflow}>
+      <MoreKey top={20.4} left={16} />
+    </Pressable>
+    <View style={{ position: 'absolute', left: space.avatarLeft, top: 13.6, zIndex: 2 }}>
+      <Avatar source={post.avatar} label={`${post.handle} profile photo`} onPress={onFollow} />
+      {badge ? <FollowBadge /> : null}
+    </View>
+  </View>
+);
+
+const PartPill: React.FC<{ index: number; total: number }> = ({ index, total }) => (
+  <View accessibilityLabel={`Part ${index} of ${total}`} style={styles.partPill}>
+    <Text style={[styles.partDigit, { left: 6.1 }]}>{index}</Text>
+    <Text style={[styles.partDigit, { left: 14.5 }]}>/</Text>
+    <Text style={[styles.partDigit, { left: 20.7 }]}>{total}</Text>
+  </View>
+);
+
+const Gallery: React.FC<{ photos: Post['gallery']; afterPill: boolean }> = ({ photos = [], afterPill }) => (
+  <ScrollView
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    style={[styles.gallery, { marginTop: afterPill ? 10.1 : rhythm.post.bodyToMedia }]}
+    contentContainerStyle={styles.galleryRow}
+  >
+    {photos.map((src, i) => (
+      <Pressable key={i} accessibilityRole="button" accessibilityLabel="Photo preview" style={[styles.galleryTile, i > 0 ? { marginLeft: 8.1 } : null]}>
+        <Image source={src} style={styles.mediaImage} resizeMode="cover" />
+      </Pressable>
+    ))}
+  </ScrollView>
+);
+
+const QuoteCard: React.FC<{ quote: NonNullable<Post['quote']>; now: number; onOpen: () => void }> = ({ quote, now, onOpen }) => (
+  <Pressable accessibilityRole="button" accessibilityLabel={`Quoted post by ${quote.handle}`} onPress={onOpen} style={styles.quoteCard}>
+    <View style={styles.quoteHead}>
+      <View style={styles.quoteAvatar}>
+        <Image source={quote.avatar} style={styles.quoteAvatarImage} />
+      </View>
+      <View style={styles.quoteLine}>
+        <Text style={styles.quoteHandle}>{quote.handle}</Text>
+        <Text style={styles.quoteTime}>{relativeTime(quote.postedAt, now)}</Text>
+      </View>
+    </View>
+    <Text style={styles.quoteBody}>{quote.body}</Text>
+  </Pressable>
 );
 
 const flushLink = (link: string) => (link.length > 18 ? `${link.slice(0, 17)}…` : link);
@@ -238,4 +319,26 @@ const styles = StyleSheet.create({
   actionInset: { position: 'relative', left: 0, top: 0, width: frame.width, height: 43.3 },
   feedRule: { position: 'absolute', left: 0, right: 0, top: 115, height: 1, backgroundColor: colors.hairline, transformOrigin: 'top', transform: [{ translateY: 0.72 }, { scaleY: 0.728 }] },
   separator: { height: 1, backgroundColor: colors.hairline },
+  topicLine: { position: 'absolute', left: space.gutter, top: 27.5 - 10, right: 48, height: 20, flexDirection: 'row', alignItems: 'center' },
+  topicHandle: { fontSize: type.body, lineHeight: 20, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body },
+  topicChevron: { marginLeft: 3, marginRight: 3.5, width: 12.5, height: 12.5 },
+  topicRun: { flexShrink: 1, fontSize: type.body, lineHeight: 20, color: colors.ink, fontFamily: fonts.body },
+  topicTime: { position: 'absolute', left: space.gutter, top: 48.7 - 10, lineHeight: 20, fontSize: type.body, color: colors.secondary, fontFamily: fonts.body },
+  topicPosted: { position: 'absolute', left: 0, top: 15.4, width: frame.width, height: 42.9 },
+  topicKey: { position: 'absolute', left: space.gutter, top: 12.9, width: 292.9, height: 48 },
+  topicTimeKey: { position: 'absolute', left: 44.4, top: 23.8, width: 48, height: 48 },
+  topicOverflow: { position: 'absolute', left: 345, top: -5, width: 48, height: 48 },
+  partPill: { marginLeft: 60.1, marginTop: 1.3, width: 33.8, height: 14.9, borderRadius: 7.45, backgroundColor: colors.pillFill },
+  partDigit: { position: 'absolute', top: 0, lineHeight: 14.9, fontSize: 11.5, color: colors.secondary, fontFamily: fonts.numbers },
+  gallery: { width: frame.width, height: 245.3, flexGrow: 0, marginBottom: 16.0 },
+  galleryRow: { paddingLeft: space.gutter, paddingRight: 16 },
+  galleryTile: { width: 184.1, height: 245.3, borderRadius: 16, overflow: 'hidden', backgroundColor: colors.surfaceAlt },
+  quoteCard: { marginLeft: space.gutter, width: 317, borderWidth: 1, borderColor: colors.hairlineStrong, borderRadius: radius.card, paddingBottom: 16 },
+  quoteHead: { height: 44.0 },
+  quoteAvatar: { position: 'absolute', left: 15.7, top: 16.1, width: 20, height: 20, borderRadius: 10, overflow: 'hidden', backgroundColor: colors.surfaceAlt },
+  quoteAvatarImage: { width: 20, height: 20 },
+  quoteLine: { position: 'absolute', left: 44.1, top: 26.3 - 10, height: 20, flexDirection: 'row', alignItems: 'center' },
+  quoteHandle: { lineHeight: 20, fontSize: type.body, fontWeight: weight.semibold, color: colors.ink, fontFamily: fonts.body },
+  quoteTime: { marginLeft: 4, lineHeight: 20, fontSize: type.body, color: colors.secondary, fontFamily: fonts.body },
+  quoteBody: { marginLeft: 16.1, width: 284.9, fontSize: type.body, lineHeight: type.bodyLine, letterSpacing: tracking.body, color: colors.ink, fontFamily: fonts.body },
 });
