@@ -3,20 +3,43 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { FontDisplay, useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { FeedScreen } from './components/FeedScreen';
-import { ThreadDetail } from './components/ThreadDetail';
-import { Composer } from './components/Composer';
-import { SearchScreen } from './components/SearchScreen';
-import { ActivityScreen } from './components/ActivityScreen';
-import { ProfileScreen } from './components/ProfileScreen';
-import { MessagesScreen } from './components/MessagesScreen';
-import { LoginScreen, type LoginVariant } from './components/LoginScreen';
-import { SettingsScreen } from './components/SettingsScreen';
-import { FollowSuggestionsScreen } from './components/FollowSuggestionsScreen';
-import { NotificationPrompt } from './components/NotificationPrompt';
-import { buildFeed, buildThread } from './data';
+import type { LoginVariant } from './components/LoginScreen';
+import { buildFeed, buildOwnThread, buildThread, type Post, type ReplyNode } from './data';
 import { colors, frame } from './tokens';
 import { useVariableWeightFont } from './webfont';
 
+
+const loadDetail = () => import('./components/ThreadDetail');
+const loadComposer = () => import('./components/Composer');
+const loadSearch = () => import('./components/SearchScreen');
+const loadActivity = () => import('./components/ActivityScreen');
+const loadProfile = () => import('./components/ProfileScreen');
+const loadMessages = () => import('./components/MessagesScreen');
+const loadLogin = () => import('./components/LoginScreen');
+const loadSettings = () => import('./components/SettingsScreen');
+const loadSuggestions = () => import('./components/FollowSuggestionsScreen');
+const loadPrompt = () => import('./components/NotificationPrompt');
+const ThreadDetail = React.lazy(() => loadDetail().then((m) => ({ default: m.ThreadDetail })));
+const Composer = React.lazy(() => loadComposer().then((m) => ({ default: m.Composer })));
+const SearchScreen = React.lazy(() => loadSearch().then((m) => ({ default: m.SearchScreen })));
+const ActivityScreen = React.lazy(() => loadActivity().then((m) => ({ default: m.ActivityScreen })));
+const ProfileScreen = React.lazy(() => loadProfile().then((m) => ({ default: m.ProfileScreen })));
+const MessagesScreen = React.lazy(() => loadMessages().then((m) => ({ default: m.MessagesScreen })));
+const LoginScreen = React.lazy(() => loadLogin().then((m) => ({ default: m.LoginScreen })));
+const SettingsScreen = React.lazy(() => loadSettings().then((m) => ({ default: m.SettingsScreen })));
+const FollowSuggestionsScreen = React.lazy(() => loadSuggestions().then((m) => ({ default: m.FollowSuggestionsScreen })));
+const NotificationPrompt = React.lazy(() => loadPrompt().then((m) => ({ default: m.NotificationPrompt })));
+
+let prefetched = false;
+const prefetch = () => {
+  if (prefetched) return;
+  prefetched = true;
+  [loadDetail, loadComposer, loadSearch, loadActivity, loadProfile, loadMessages, loadLogin, loadSettings, loadSuggestions, loadPrompt].forEach(
+    (load) => {
+      load().catch(() => undefined);
+    },
+  );
+};
 
 const FONT_GRACE_MS = 1500;
 
@@ -34,6 +57,14 @@ export default function App() {
   }, []);
   const fontsReady = fontsLoaded || !!fontError || fontGraceOver;
   useVariableWeightFont('ThreadsBody');
+  React.useEffect(() => {
+    if (fontsLoaded || fontError) {
+      prefetch();
+      return undefined;
+    }
+    const t = setTimeout(prefetch, 8000);
+    return () => clearTimeout(t);
+  }, [fontsLoaded, fontError]);
 
   const [now] = React.useState(() => Date.now());
   const [screen, setScreen] = React.useState<Screen>('feed');
@@ -45,6 +76,11 @@ export default function App() {
   const [query, setQuery] = React.useState('');
   const [audience, setAudience] = React.useState('Community or topic');
   const [posted, setPosted] = React.useState(false);
+  const [ownPosts, setOwnPosts] = React.useState<Post[]>([]);
+  const [ownReplies, setOwnReplies] = React.useState<ReplyNode[]>([]);
+  const [reposted, setReposted] = React.useState<Record<string, boolean>>({});
+  const toggleRepost = React.useCallback((id: string) => setReposted((s) => ({ ...s, [id]: !s[id] })), []);
+  const addReply = React.useCallback((r: ReplyNode) => setOwnReplies((s) => [...s, r]), []);
   const [askNotifications, setAskNotifications] = React.useState(false);
   const [notificationsOn, setNotificationsOn] = React.useState(false);
   const requestNotifications = React.useCallback(() => setAskNotifications(true), []);
@@ -111,6 +147,7 @@ export default function App() {
     <View style={styles.shell}>
       <StatusBar style="dark" />
       <View style={styles.frame}>
+        <React.Suspense fallback={null}>
         {screen === 'login' ? (
           <LoginScreen
             variant={loginVariant}
@@ -145,6 +182,9 @@ export default function App() {
             onScrollOffset={(y) => (feedOffset.current = y)}
             followed={followed}
             onToggleFollow={toggleFollow}
+            ownPosts={ownPosts}
+            reposted={reposted}
+            onToggleRepost={toggleRepost}
           />
         ) : null}
 
@@ -160,6 +200,8 @@ export default function App() {
             onToggleFollow={() => toggleFollow(thread.root.handle)}
             notificationsOn={notificationsOn}
             onRequestNotifications={requestNotifications}
+            added={ownReplies}
+            onAddReply={addReply}
           />
         ) : null}
 
@@ -171,6 +213,7 @@ export default function App() {
             onRemoveSegment={(i) => setSegments((s) => (s.length <= 1 ? s : s.filter((_, j) => j !== i)))}
             onClose={() => setScreen('feed')}
             onPost={() => {
+              setOwnPosts((s) => [...buildOwnThread(segments, Date.now(), s.length), ...s]);
               setSegments(['']);
               setPosted(true);
               setScreen('feed');
@@ -184,9 +227,26 @@ export default function App() {
         {screen === 'activity' ? (
           <ActivityScreen now={now} onNavigate={onNavigate} notificationsOn={notificationsOn} onRequestNotifications={requestNotifications} />
         ) : null}
-        {screen === 'profile' ? <ProfileScreen onNavigate={onNavigate} followed={followed} onToggleFollow={toggleFollow} /> : null}
+        {screen === 'profile' ? (
+          <ProfileScreen
+            onNavigate={onNavigate}
+            followed={followed}
+            onToggleFollow={toggleFollow}
+            now={now}
+            ownPosts={ownPosts}
+            ownReplies={ownReplies}
+            replyContext={thread.root}
+            repostedPosts={feed.filter((p) => reposted[p.id])}
+            liked={liked}
+            onToggleLike={toggleLike}
+            onOpenPost={openPost}
+            onToggleRepost={toggleRepost}
+          />
+        ) : null}
         {screen === 'settings' ? <SettingsScreen onBack={() => setScreen('profile')} /> : null}
         {screen === 'messages' ? <MessagesScreen onNavigate={onNavigate} onRequestNotifications={requestNotifications} /> : null}
+        </React.Suspense>
+        <React.Suspense fallback={null}>
         {askNotifications ? (
           <NotificationPrompt
             onAllow={() => {
@@ -196,6 +256,7 @@ export default function App() {
             onDeny={closePrompt}
           />
         ) : null}
+        </React.Suspense>
       </View>
 
       <Pressable

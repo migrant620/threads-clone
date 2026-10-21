@@ -17,7 +17,13 @@ type Props = {
   onScrollOffset?: (y: number) => void;
   followed?: Record<string, boolean>;
   onToggleFollow?: (handle: string) => void;
+  ownPosts?: Post[];
+  reposted?: Record<string, boolean>;
+  onToggleRepost?: (id: string) => void;
 };
+
+const FeedsPanel = React.lazy(() => import('./FeedsPanel').then((m) => ({ default: m.FeedsPanel })));
+const MediaViewer = React.lazy(() => import('./MediaViewer').then((m) => ({ default: m.MediaViewer })));
 
 const FEED_TOP = 115.6;
 const FEED_HEIGHT = 728 - FEED_TOP;
@@ -25,14 +31,34 @@ const TRIGGER = 30;
 const MAX_PULL = 70;
 const REFRESH_MS = 900;
 
-export const FeedScreen: React.FC<Props> = ({ now, posts, liked, onToggleLike, onOpenPost, onNavigate, scrollRef, onScrollOffset, followed = {}, onToggleFollow }) => {
+export const FeedScreen: React.FC<Props> = ({
+  now,
+  posts,
+  liked,
+  onToggleLike,
+  onOpenPost,
+  onNavigate,
+  scrollRef,
+  onScrollOffset,
+  followed = {},
+  onToggleFollow,
+  ownPosts = [],
+  reposted = {},
+  onToggleRepost,
+}) => {
   const [pull, setPull] = React.useState(0);
   const [refreshing, setRefreshing] = React.useState(false);
   const offset = React.useRef(0);
   const pulled = React.useRef(0);
   const busy = React.useRef(false);
   const [sheet, setSheet] = React.useState<{ kind: 'repost' | 'share'; id: string } | null>(null);
-  const [reposted, setReposted] = React.useState<Record<string, boolean>>({});
+  const [feedsOpen, setFeedsOpen] = React.useState(false);
+  const [viewing, setViewing] = React.useState<Post['photo'] | null>(null);
+  const dragged = React.useRef(false);
+  const openPhoto = React.useCallback((src: NonNullable<Post['photo']>) => {
+    if (dragged.current || busy.current) return;
+    setViewing(src);
+  }, []);
 
   const begin = React.useCallback(() => {
     busy.current = true;
@@ -53,12 +79,16 @@ export const FeedScreen: React.FC<Props> = ({ now, posts, liked, onToggleLike, o
         onStartShouldSetPanResponder: () => false,
         onMoveShouldSetPanResponder: (_e, g) =>
           !busy.current && offset.current <= 0 && g.dy > 6 && Math.abs(g.dy) > Math.abs(g.dx),
+        onPanResponderGrant: () => {
+          dragged.current = true;
+        },
         onPanResponderMove: (_e, g) => {
           const d = Math.max(0, Math.min(MAX_PULL, g.dy * 0.5));
           pulled.current = d;
           setPull(d);
         },
         onPanResponderRelease: () => {
+          setTimeout(() => (dragged.current = false), 0);
           if (pulled.current >= TRIGGER) begin();
           else {
             pulled.current = 0;
@@ -66,6 +96,7 @@ export const FeedScreen: React.FC<Props> = ({ now, posts, liked, onToggleLike, o
           }
         },
         onPanResponderTerminate: () => {
+          setTimeout(() => (dragged.current = false), 0);
           pulled.current = 0;
           setPull(0);
         },
@@ -75,7 +106,7 @@ export const FeedScreen: React.FC<Props> = ({ now, posts, liked, onToggleLike, o
 
   return (
     <View style={styles.screen}>
-      <TopBar left="menu" wordmark right={['search']} onRight={(k) => (k === 'search' ? onNavigate('search') : undefined)} />
+      <TopBar left="menu" onLeft={() => setFeedsOpen(true)} wordmark right={['search']} onRight={(k) => (k === 'search' ? onNavigate('search') : undefined)} />
       <ComposerEntry onPress={() => onNavigate('create')} />
       <View pointerEvents="none" style={styles.feedRule} />
       {refreshing || pull > 0 ? (
@@ -99,6 +130,21 @@ export const FeedScreen: React.FC<Props> = ({ now, posts, liked, onToggleLike, o
           }}
           scrollEventThrottle={16}
         >
+          {ownPosts.map((p) => (
+            <PostCard
+              key={p.id}
+              post={p}
+              index={-1}
+              now={now}
+              liked={!!liked[p.id]}
+              reposted={false}
+              onToggleLike={() => onToggleLike(p.id)}
+              onOpen={() => onOpenPost(p.id)}
+              onRepostKey={() => setSheet({ kind: 'repost', id: p.id })}
+              onShareKey={() => setSheet({ kind: 'share', id: p.id })}
+              onPhoto={openPhoto}
+            />
+          ))}
           {posts.map((p, i) => (
             <PostCard
               key={p.id}
@@ -113,6 +159,7 @@ export const FeedScreen: React.FC<Props> = ({ now, posts, liked, onToggleLike, o
               onShareKey={() => setSheet({ kind: 'share', id: p.id })}
               following={!!followed[p.handle]}
               onFollow={onToggleFollow ? () => onToggleFollow(p.handle) : undefined}
+              onPhoto={openPhoto}
             />
           ))}
         </ScrollView>
@@ -126,7 +173,7 @@ export const FeedScreen: React.FC<Props> = ({ now, posts, liked, onToggleLike, o
                   {
                     label: 'Repost',
                     onPress: () => {
-                      setReposted((s) => ({ ...s, [sheet.id]: !s[sheet.id] }));
+                      onToggleRepost?.(sheet.id);
                       setSheet(null);
                     },
                   },
@@ -140,6 +187,10 @@ export const FeedScreen: React.FC<Props> = ({ now, posts, liked, onToggleLike, o
           onClose={() => setSheet(null)}
         />
       ) : null}
+      <React.Suspense fallback={null}>
+        {feedsOpen ? <FeedsPanel onClose={() => setFeedsOpen(false)} /> : null}
+        {viewing ? <MediaViewer source={viewing} onClose={() => setViewing(null)} /> : null}
+      </React.Suspense>
     </View>
   );
 };
@@ -166,7 +217,8 @@ export const PostCard: React.FC<{
   index?: number;
   following?: boolean;
   onFollow?: () => void;
-}> = ({ post, now, liked, reposted, onToggleLike, onOpen, onRepostKey, onShareKey, index = 0, following = false, onFollow }) => {
+  onPhoto?: (src: NonNullable<Post['photo']>) => void;
+}> = ({ post, now, liked, reposted, onToggleLike, onOpen, onRepostKey, onShareKey, index = 0, following = false, onFollow, onPhoto }) => {
   const badge = !!post.suggestFollow && !following;
   const hasMedia = !!(post.photo || post.gallery || post.quote);
   return (
@@ -200,12 +252,17 @@ export const PostCard: React.FC<{
       </Text>
     </View>
     {post.part ? <PartPill index={post.part.index} total={post.part.total} /> : null}
-    {post.gallery ? <Gallery photos={post.gallery} afterPill={!!post.part} /> : null}
+    {post.gallery ? <Gallery photos={post.gallery} afterPill={!!post.part} onPhoto={onPhoto} /> : null}
     {post.quote ? <QuoteCard quote={post.quote} now={now} onOpen={onOpen} /> : null}
     {post.photo ? (
       <View style={styles.mediaBlock}>
         <Pressable accessibilityRole="button" accessibilityLabel="" style={styles.mediaPlate}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Photo preview" style={styles.media}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Photo preview"
+            onPress={onPhoto && post.photo ? () => onPhoto(post.photo as NonNullable<Post['photo']>) : undefined}
+            style={styles.media}
+          >
             <Image source={post.photo} style={styles.mediaImage} resizeMode="cover" />
           </Pressable>
         </Pressable>
@@ -265,7 +322,11 @@ const PartPill: React.FC<{ index: number; total: number }> = ({ index, total }) 
   </View>
 );
 
-const Gallery: React.FC<{ photos: Post['gallery']; afterPill: boolean }> = ({ photos = [], afterPill }) => (
+const Gallery: React.FC<{ photos: Post['gallery']; afterPill: boolean; onPhoto?: (src: NonNullable<Post['photo']>) => void }> = ({
+  photos = [],
+  afterPill,
+  onPhoto,
+}) => (
   <ScrollView
     horizontal
     showsHorizontalScrollIndicator={false}
@@ -273,7 +334,13 @@ const Gallery: React.FC<{ photos: Post['gallery']; afterPill: boolean }> = ({ ph
     contentContainerStyle={styles.galleryRow}
   >
     {photos.map((src, i) => (
-      <Pressable key={i} accessibilityRole="button" accessibilityLabel="Photo preview" style={[styles.galleryTile, i > 0 ? { marginLeft: 8.1 } : null]}>
+      <Pressable
+        key={i}
+        accessibilityRole="button"
+        accessibilityLabel="Photo preview"
+        onPress={onPhoto ? () => onPhoto(src) : undefined}
+        style={[styles.galleryTile, i > 0 ? { marginLeft: 8.1 } : null]}
+      >
         <Image source={src} style={styles.mediaImage} resizeMode="cover" />
       </Pressable>
     ))}

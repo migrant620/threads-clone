@@ -23,6 +23,28 @@ const SEG_ROWS = [
   { avatarTop: 140.8, handleTop: 128.8, fieldTop: 162.6, hintTop: 169.2, fieldH: 17.5, clearPlateTop: 128.8, clearTop: 147.0, chipLeft: 120.4, chipTop: 142.2, mergedTop: 142.6, mergedLeft: 115.7, mergedH: 20.4, digitTop: 145.6, digitH: 36 },
 ];
 
+const SEG_PITCH = SEG_ROWS[1].handleTop - SEG_ROWS[0].handleTop;
+const segRow = (i: number) => {
+  if (i < SEG_ROWS.length) return SEG_ROWS[i];
+  const base = SEG_ROWS[SEG_ROWS.length - 1];
+  const dy = (i - (SEG_ROWS.length - 1)) * SEG_PITCH;
+  return {
+    ...base,
+    avatarTop: base.avatarTop + dy,
+    handleTop: base.handleTop + dy,
+    fieldTop: base.fieldTop + dy,
+    hintTop: base.hintTop + dy,
+    clearPlateTop: base.clearPlateTop + dy,
+    clearTop: base.clearTop + dy,
+    chipTop: base.chipTop + dy,
+    mergedTop: base.mergedTop + dy,
+    digitTop: base.digitTop + dy,
+  };
+};
+
+const CHIP_SEP_BACK = 12.2;
+const CHIP_W = 31;
+
 const SEP = '\ufffd';
 
 export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, onRemoveSegment, onClose, onPost, audience, onAudience }) => {
@@ -31,11 +53,15 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
   const trimmed = segments.map((s) => s.trim()).filter(Boolean);
   const canPost = trimmed.length > 0;
   const anyText = trimmed.length > 0;
+  const lastFilled = segments.length > 0 && segments[segments.length - 1].trim().length > 0;
+  const [firstRunW, setFirstRunW] = React.useState<number | null>(null);
+  const chipLeftFor = (i: number, row: { chipLeft: number; mergedLeft: number }) =>
+    i === 0 && firstRunW !== null ? Math.min(row.mergedLeft + firstRunW - CHIP_SEP_BACK, 60 + 317 - CHIP_W) : row.chipLeft;
 
   const requestClose = () => (anyText ? setConfirming(true) : onClose());
 
   const emptySingle = !multi && !anyText;
-  const hintTopFor = (i: number) => (emptySingle && i === 0 ? 95.0 : SEG_ROWS[i].hintTop);
+  const hintTopFor = (i: number) => (emptySingle && i === 0 ? 95.0 : segRow(i).hintTop);
   const lastHintTop = hintTopFor(segments.length - 1);
   const attachTop = (anyText && !multi ? 119.4 : emptySingle ? 118.6 : lastHintTop + (anyText ? 23.7 : 23.6));
   const addTop = attachTop + 56;
@@ -57,10 +83,10 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
 
       <View style={styles.headerRule} pointerEvents="none" />
 
-      {multi ? <View style={[styles.segmentConnector, { top: 56, height: SEG_ROWS[segments.length - 1].handleTop - 32 }]} /> : null}
+      {multi ? <View style={[styles.segmentConnector, { top: 56, height: segRow(segments.length - 1).handleTop - 32 }]} /> : null}
 
       {segments.map((text, i) => {
-        const row = SEG_ROWS[i];
+        const row = segRow(i);
         const empty = text.trim().length === 0;
         return (
           <View key={i}>
@@ -104,19 +130,23 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
               ) : null}
             </Pressable>
 
-            {multi ? <View style={[styles.chip, { left: row.chipLeft, top: row.chipTop }]} /> : null}
+            {multi ? <View style={[styles.chip, { left: chipLeftFor(i, row), top: row.chipTop }]} /> : null}
 
             {multi ? (
-              <Text style={[styles.mergedRun, { left: row.mergedLeft, top: row.mergedTop, width: 120, lineHeight: row.mergedH }]}>
+              <Text
+                numberOfLines={1}
+                onLayout={i === 0 ? (e) => setFirstRunW(e.nativeEvent.layout.width) : undefined}
+                style={[styles.mergedRun, { left: row.mergedLeft, top: row.mergedTop, maxWidth: 317, lineHeight: row.mergedH }]}
+              >
                 {empty ? `m620ui  ${SEP}` : `${text} ${SEP}`}
               </Text>
             ) : null}
 
             {multi ? (
               <>
-                <Text style={[styles.chipDigit, { left: row.chipLeft + 5, top: row.digitTop, height: row.digitH }]}>{i + 1}</Text>
-                <Text style={[styles.chipDigit, { left: row.chipLeft + 14.5, top: row.digitTop, height: row.digitH }]}>/</Text>
-                <Text style={[styles.chipDigit, { left: row.chipLeft + 21.7, top: row.digitTop, height: row.digitH }]}>{segments.length}</Text>
+                <Text style={[styles.chipDigit, { left: chipLeftFor(i, row) + 5, top: row.digitTop, height: row.digitH }]}>{i + 1}</Text>
+                <Text style={[styles.chipDigit, { left: chipLeftFor(i, row) + 14.5, top: row.digitTop, height: row.digitH }]}>/</Text>
+                <Text style={[styles.chipDigit, { left: chipLeftFor(i, row) + 21.7, top: row.digitTop, height: row.digitH }]}>{segments.length}</Text>
               </>
             ) : null}
 
@@ -137,8 +167,14 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
       })}
 
       <AttachmentRow top={attachTop} />
-      <Pressable accessibilityRole="button" accessibilityLabel="Add to thread" onPress={onAddSegment} style={[styles.addToThread, { top: addTop }]}>
-        <Text style={[styles.addToThreadText, { color: multi || !anyText ? colors.hintLight : colors.secondary }]}>Add to thread</Text>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Add to thread"
+        disabled={!lastFilled}
+        onPress={onAddSegment}
+        style={[styles.addToThread, { top: addTop }]}
+      >
+        <Text style={[styles.addToThreadText, { color: lastFilled ? colors.secondary : colors.hintLight }]}>Add to thread</Text>
       </Pressable>
 
       <View style={styles.bottomBar}>

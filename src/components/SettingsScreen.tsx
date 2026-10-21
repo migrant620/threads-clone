@@ -51,7 +51,9 @@ const GROUPS: Array<{ title: string; rows: Array<{ label: string; chevron?: bool
   },
 ];
 
-export const SettingsScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => (
+export const SettingsScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+  const [on, setOn] = React.useState<Record<string, boolean>>({});
+  return (
   <View style={styles.screen}>
     <View style={styles.topBar}>
       <Pressable
@@ -71,30 +73,37 @@ export const SettingsScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => 
           <View key={group.title} style={styles.group}>
             <Text style={styles.groupTitle}>{group.title}</Text>
             <View style={styles.card}>
-              {group.rows.map((row, index) => (
+              {group.rows.map((row, index) => {
+                const toggle = row.chevron === false;
+                const checked = !!on[row.label];
+                return (
                 <Pressable
                   key={row.label}
-                  accessibilityRole="button"
+                  role={toggle ? 'switch' : 'button'}
                   accessibilityLabel={row.label}
+                  aria-checked={toggle ? checked : undefined}
+                  onPress={toggle ? () => setOn((s) => ({ ...s, [row.label]: !s[row.label] })) : undefined}
                   style={[styles.row, index > 0 && styles.rowDivided]}
                 >
                   <Text style={styles.rowLabel}>{row.label}</Text>
-                  {row.chevron === false ? (
-                    <View style={styles.switchTrack}>
+                  {toggle ? (
+                    <View style={[styles.switchTrack, checked ? styles.switchTrackOn : null]}>
                       <View style={styles.switchThumb} />
                     </View>
                   ) : (
                     <ChevronRightIcon size={16} color={colors.secondary} />
                   )}
                 </Pressable>
-              ))}
+                );
+              })}
             </View>
           </View>
         ))}
       </View>
     </ScrollView>
   </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   screen: { flex: 1, width: frame.width, backgroundColor: colors.page },
@@ -150,6 +159,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingLeft: 2,
   },
+  switchTrackOn: { backgroundColor: colors.ink, alignItems: 'flex-end', paddingLeft: 0, paddingRight: 2 },
   switchThumb: {
     width: 22,
     height: 22,

@@ -2,14 +2,39 @@ import * as React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ActionSheet, Avatar, BottomNav, Verified } from './Chrome';
 import { CloseIcon, InsightsIcon, InstagramMark, PlusIcon, ProfileIcon, SearchIcon, SettingsIcon } from './Icons';
-import { account, suggestions } from '../data';
+import { PostCard } from './FeedScreen';
+import { account, suggestions, type Post, type ReplyNode } from '../data';
 import { colors, fonts, frame, icons as iconSize, radius, tracking, type, weight } from '../tokens';
 
 type Props = {
   onNavigate: (key: string) => void;
   followed: Record<string, boolean>;
   onToggleFollow: (handle: string) => void;
+  now: number;
+  ownPosts: Post[];
+  ownReplies: ReplyNode[];
+  replyContext: Post;
+  repostedPosts: Post[];
+  liked: Record<string, boolean>;
+  onToggleLike: (id: string) => void;
+  onOpenPost: (id: string) => void;
+  onToggleRepost: (id: string) => void;
 };
+
+const LIST_TOP = 577.8;
+
+const replyAsPost = (r: ReplyNode): Post => ({
+  id: r.id,
+  handle: r.handle,
+  avatar: r.avatar,
+  verified: r.verified,
+  postedAt: r.postedAt,
+  body: r.body,
+  likes: r.likes,
+  replies: r.replies,
+  reposts: r.reposts,
+  mine: true,
+});
 
 const TABS = ['Threads', 'Replies', 'Media', 'Reposts'] as const;
 const TAB = [
@@ -25,11 +50,36 @@ const CARD = [
   { avatarX: 382.45, nameX: 375.9, handleX: null, followX: 358.43, followW: 34.57, dismissX: null, badgeX: 384.63 },
 ];
 
-export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleFollow }) => {
+export const ProfileScreen: React.FC<Props> = ({
+  onNavigate,
+  followed,
+  onToggleFollow,
+  now,
+  ownPosts,
+  ownReplies,
+  replyContext,
+  repostedPosts,
+  liked,
+  onToggleLike,
+  onOpenPost,
+  onToggleRepost,
+}) => {
   const [tab, setTab] = React.useState<string>('Threads');
   const [hidden, setHidden] = React.useState<Record<string, boolean>>({});
   const visible = suggestions.filter((s) => !hidden[s.handle]);
   const [sharing, setSharing] = React.useState(false);
+  const [repostSheet, setRepostSheet] = React.useState<string | null>(null);
+  const list: Post[] =
+    tab === 'Threads'
+      ? ownPosts
+      : tab === 'Replies'
+        ? ownReplies.length
+          ? [replyContext, ...ownReplies.map(replyAsPost)]
+          : []
+        : tab === 'Reposts'
+          ? repostedPosts
+          : [];
+  const hasList = list.length > 0;
 
   return (
     <View style={styles.screen}>
@@ -54,7 +104,7 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
         contentContainerStyle={{ paddingBottom: 12 }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={{ width: frame.width, height: 690 }}>
+        <View style={{ width: frame.width, height: hasList ? LIST_TOP : 690 }}>
           <Pressable accessibilityRole="button" accessibilityLabel="Profile picture" style={styles.ownAvatar}>
             <ProfileIcon size={40} color={colors.ink} />
           </Pressable>
@@ -163,6 +213,7 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
 
           <View style={styles.tabRule} pointerEvents="none" />
 
+          {hasList ? null : (
           <Text
             style={[
               styles.emptyRun,
@@ -183,7 +234,22 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
                   ? "Nothing you've reposted yet."
                   : `No ${tab.toLowerCase()} yet`}
           </Text>
+          )}
         </View>
+        {list.map((p) => (
+          <PostCard
+            key={`${tab}-${p.id}`}
+            post={p}
+            index={-1}
+            now={now}
+            liked={!!liked[p.id]}
+            reposted={tab === 'Reposts'}
+            onToggleLike={() => onToggleLike(p.id)}
+            onOpen={() => onOpenPost(p.id)}
+            onRepostKey={() => setRepostSheet(p.id)}
+            onShareKey={() => setSharing(true)}
+          />
+        ))}
       </ScrollView>
 
       <BottomNav current="profile" onSelect={onNavigate} unread={false} />
@@ -194,6 +260,21 @@ export const ProfileScreen: React.FC<Props> = ({ onNavigate, followed, onToggleF
             { label: 'Share', onPress: () => setSharing(false) },
           ]}
           onClose={() => setSharing(false)}
+        />
+      ) : null}
+      {repostSheet ? (
+        <ActionSheet
+          rows={[
+            {
+              label: 'Repost',
+              onPress: () => {
+                onToggleRepost(repostSheet);
+                setRepostSheet(null);
+              },
+            },
+            { label: 'Quote', onPress: () => setRepostSheet(null) },
+          ]}
+          onClose={() => setRepostSheet(null)}
         />
       ) : null}
     </View>

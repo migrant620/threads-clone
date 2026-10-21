@@ -18,6 +18,8 @@ type Props = {
   onToggleFollow: () => void;
   notificationsOn: boolean;
   onRequestNotifications: () => void;
+  added: ReplyNode[];
+  onAddReply: (reply: ReplyNode) => void;
 };
 
 const HEADER = 56;
@@ -125,7 +127,20 @@ const RowPlate: React.FC<{ box: Box; label: string; children?: React.ReactNode }
   </Pressable>
 );
 
-export const ThreadDetail: React.FC<Props> = ({ now, root, replies, liked, onToggleLike, onBack, followed, onToggleFollow, notificationsOn, onRequestNotifications }) => {
+export const ThreadDetail: React.FC<Props> = ({
+  now,
+  root,
+  replies,
+  liked,
+  onToggleLike,
+  onBack,
+  followed,
+  onToggleFollow,
+  notificationsOn,
+  onRequestNotifications,
+  added,
+  onAddReply,
+}) => {
   const [subscribed, setSubscribed] = React.useState(false);
   const onHeaderKey = (key: string) => {
     if (key !== 'bell') return;
@@ -134,28 +149,23 @@ export const ThreadDetail: React.FC<Props> = ({ now, root, replies, liked, onTog
   };
   const [expanded, setExpanded] = React.useState(true);
   const [replyDraft, setReplyDraft] = React.useState('');
-  const [added, setAdded] = React.useState<ReplyNode[]>([]);
-
   const postReply = React.useCallback(() => {
     const text = replyDraft.trim();
     if (!text) return;
-    setAdded((prev) => [
-      ...prev,
-      {
-        id: `local-${now}-${prev.length}`,
-        handle: account.handle,
-        avatar: account.avatar,
-        verified: false,
-        postedAt: now,
-        body: text,
-        likes: 0,
-        replies: 0,
-        reposts: 0,
-        depth: 0,
-      },
-    ]);
+    onAddReply({
+      id: `local-${now}-${added.length}`,
+      handle: account.handle,
+      avatar: account.avatar,
+      verified: false,
+      postedAt: Date.now(),
+      body: text,
+      likes: 0,
+      replies: 0,
+      reposts: 0,
+      depth: 0,
+    });
     setReplyDraft('');
-  }, [now, replyDraft]);
+  }, [now, replyDraft, added.length, onAddReply]);
 
   const barInput = React.useRef<TextInput>(null);
   const focusReply = React.useCallback(() => barInput.current?.focus(), []);
@@ -290,7 +300,7 @@ export const ThreadDetail: React.FC<Props> = ({ now, root, replies, liked, onTog
             {i === 0 ? (
               <React.Fragment>
                 <View pointerEvents="none" style={[styles.likedRing, { left: 332, top: 329.8 - HEADER }]}>
-                  <Image source={root.avatar} style={styles.likedFace} />
+                  <Image source={root.avatar ?? undefined} style={styles.likedFace} />
                 </View>
                 <View pointerEvents="none" style={[styles.likedHeartRing, { left: 324.55, top: 337.1 - HEADER }]}>
                   <HeartIcon size={9.6} color="#FF3040" filled />

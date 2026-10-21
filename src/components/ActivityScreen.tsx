@@ -60,6 +60,7 @@ export const ActivityScreen: React.FC<Props> = ({ now, onNavigate, notifications
             key={c.label}
             accessibilityRole="button"
             accessibilityLabel={c.label}
+            aria-selected={on}
             onPress={() => setTab(c.label)}
             style={[
               styles.chip,
@@ -72,6 +73,8 @@ export const ActivityScreen: React.FC<Props> = ({ now, onNavigate, notifications
         );
       })}
 
+      {tab === 'All' ? (
+      <>
       <Text style={styles.sectionLabel}>New</Text>
       <RowHairline top={117.5} />
 
@@ -110,6 +113,8 @@ export const ActivityScreen: React.FC<Props> = ({ now, onNavigate, notifications
           </React.Fragment>
         );
       })}
+      </>
+      ) : null}
 
       {notificationsOn || footerDismissed ? null : (
       <View style={styles.footer}>

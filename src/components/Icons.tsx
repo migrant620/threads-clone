@@ -206,6 +206,13 @@ export const BackIcon: React.FC<IconProps> = ({ size = 24, color = colors.ink, s
   </Svg>
 );
 
+export const PencilIcon: React.FC<IconProps> = ({ size = 24, color = colors.ink, strokeWidth = 2 }) => (
+  <Svg {...base(size, color, strokeWidth)}>
+    <Path d="M15.2 5.2 18.8 8.8 8.6 19H5v-3.6z" />
+    <Path d="m13.2 7.2 3.6 3.6" />
+  </Svg>
+);
+
 export const CloseIcon: React.FC<IconProps> = ({ size = 16, color = colors.ink, strokeWidth = 2 }) => (
   <Svg {...base(size, color, strokeWidth)}>
     <Line x1="5.4" y1="5.4" x2="18.6" y2="18.6" />
