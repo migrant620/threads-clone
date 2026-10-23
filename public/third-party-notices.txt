@@ -33,8 +33,7 @@ All avatars and post images are original works produced for this prototype:
   screenshots, recolourings, crops or derivatives of any photograph or
   illustration from the Threads application, and they carry no
   third-party copyright. The avatars are deliberately abstract so that no
-  real person is depicted. They are distributed under the prototype's
-  noncommercial study licence. Every image and its provenance is listed in
+  real person is depicted. They are distributed under the prototype's MIT License. Every image and its provenance is listed in
   this repository's asset notes.
 
 No image obtained from the Threads application, and no image depicting an
