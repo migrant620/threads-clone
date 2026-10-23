@@ -2,7 +2,7 @@
   "name": "threads-clone",
   "version": "0.0.0",
   "private": true,
-  "description": "An independent, interactive Threads-style UI prototype built with Expo, React Native, and TypeScript. Noncommercial study and research only. Not affiliated with, endorsed by, or sponsored by Meta or Instagram.",
+  "description": "An independent, interactive Threads-style UI prototype built with Expo, React Native, and TypeScript. Not affiliated with, endorsed by, or sponsored by Meta or Instagram.",
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
@@ -26,5 +26,5 @@
     "@types/react": "~19.2.2",
     "typescript": "6.0.3"
   },
-  "license": "SEE LICENSE IN LICENSE"
+  "license": "MIT"
 }
