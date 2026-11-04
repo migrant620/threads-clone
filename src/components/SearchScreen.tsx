@@ -36,12 +36,30 @@ const RESULT_ROWS: Array<{ handle: number; avatar: number; name: number | null; 
   { handle: 677.6, avatar: 679.7, name: 697.2, nameDy: 1.7, badge: 163.4, handleInk: '#1B1B1F' },
 ];
 
-export const SearchScreen: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed, onToggleFollow }) => {
-  const typed = query.trim();
-  return typed.length > 0 ? (
-    <Results query={query} onQuery={onQuery} onBack={onBack} onNavigate={onNavigate} followed={followed} onToggleFollow={onToggleFollow} />
-  ) : (
-    <Landing query={query} onQuery={onQuery} onBack={onBack} onNavigate={onNavigate} followed={followed} onToggleFollow={onToggleFollow} />
+export const SearchScreen: React.FC<Props> = (props) => {
+  const { query, onQuery, onBack } = props;
+  const typed = query.trim().length > 0;
+  const keyboardProps = {
+    onKeyDownCapture: (event: React.KeyboardEvent) => {
+      if (event.key !== 'Escape' || event.nativeEvent.isComposing) return;
+      event.preventDefault();
+      if (query) onQuery('');
+      else onBack();
+    },
+  };
+  return (
+    <View style={styles.screen} {...keyboardProps}>
+      {typed ? <Results {...props} /> : <Landing {...props} />}
+      <TextInput
+        accessibilityLabel="Search field"
+        value={query}
+        onChangeText={onQuery}
+        placeholder="Search"
+        placeholderTextColor={colors.secondary}
+        style={typed ? styles.resultsInput : styles.fieldInput}
+        autoCapitalize="none"
+      />
+    </View>
   );
 };
 
@@ -125,14 +143,7 @@ const Landing: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed
       </View>
     </ScrollView>
 
-    <TextInput
-      accessibilityLabel="Search field"
-      value={query}
-      onChangeText={onQuery}
-      placeholder="Search"
-      placeholderTextColor={colors.secondary}
-      style={styles.fieldInput}
-    />
+
 
     <BottomNav current="feed" onSelect={onNavigate} />
   </View>
@@ -180,13 +191,7 @@ const Results: React.FC<Props> = ({ query, onQuery, onBack, onNavigate }) => (
       right={[{ key: 'filters', left: 333, width: 48, top: 8.4 }]}
       onRight={() => undefined}
     />
-    <TextInput
-      accessibilityLabel="Search field"
-      value={query}
-      onChangeText={onQuery}
-      style={styles.resultsInput}
-      autoCapitalize="none"
-    />
+
 
     <ScrollView style={styles.body} contentContainerStyle={{ height: 720 }} scrollEnabled={false}>
       {searchAccounts.map((acct, i) => {

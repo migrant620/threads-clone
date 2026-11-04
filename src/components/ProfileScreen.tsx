@@ -7,6 +7,8 @@ import { account, suggestions, type Post, type ReplyNode } from '../data';
 import { colors, fonts, frame, icons as iconSize, radius, tracking, type, weight } from '../tokens';
 
 type Props = {
+  tab: string;
+  onTab: (tab: string) => void;
   onNavigate: (key: string) => void;
   followed: Record<string, boolean>;
   onToggleFollow: (handle: string) => void;
@@ -51,6 +53,8 @@ const CARD = [
 ];
 
 export const ProfileScreen: React.FC<Props> = ({
+  tab,
+  onTab,
   onNavigate,
   followed,
   onToggleFollow,
@@ -64,7 +68,6 @@ export const ProfileScreen: React.FC<Props> = ({
   onOpenPost,
   onToggleRepost,
 }) => {
-  const [tab, setTab] = React.useState<string>('Threads');
   const [hidden, setHidden] = React.useState<Record<string, boolean>>({});
   const visible = suggestions.filter((s) => !hidden[s.handle]);
   const [sharing, setSharing] = React.useState(false);
@@ -190,7 +193,7 @@ export const ProfileScreen: React.FC<Props> = ({
                 key={t}
                 accessibilityRole="button"
                 accessibilityLabel={t}
-                onPress={() => setTab(t)}
+                onPress={() => onTab(t)}
                 style={{ position: 'absolute', left: TAB[i].x, top: 544.38 + TAB[i].dy, width: TAB[i].w, height: 20, justifyContent: 'center' }}
               >
                 <Text

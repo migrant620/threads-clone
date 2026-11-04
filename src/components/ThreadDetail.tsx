@@ -13,6 +13,8 @@ type Props = {
   liked: Record<string, boolean>;
   onToggleLike: (id: string) => void;
   onBack: () => void;
+  replyDraft: string;
+  onReplyDraft: (value: string) => void;
   onOpenReply?: () => void;
   followed: boolean;
   onToggleFollow: () => void;
@@ -134,6 +136,8 @@ export const ThreadDetail: React.FC<Props> = ({
   liked,
   onToggleLike,
   onBack,
+  replyDraft,
+  onReplyDraft,
   followed,
   onToggleFollow,
   notificationsOn,
@@ -148,7 +152,6 @@ export const ThreadDetail: React.FC<Props> = ({
     setSubscribed((v) => !v);
   };
   const [expanded, setExpanded] = React.useState(true);
-  const [replyDraft, setReplyDraft] = React.useState('');
   const postReply = React.useCallback(() => {
     const text = replyDraft.trim();
     if (!text) return;
@@ -164,8 +167,8 @@ export const ThreadDetail: React.FC<Props> = ({
       reposts: 0,
       depth: 0,
     });
-    setReplyDraft('');
-  }, [now, replyDraft, added.length, onAddReply]);
+    onReplyDraft('');
+  }, [now, replyDraft, added.length, onAddReply, onReplyDraft]);
 
   const barInput = React.useRef<TextInput>(null);
   const focusReply = React.useCallback(() => barInput.current?.focus(), []);
@@ -345,7 +348,7 @@ export const ThreadDetail: React.FC<Props> = ({
         placeholder={`Reply to ${root.handle}`}
         placeholderTextColor={colors.secondary}
         value={replyDraft}
-        onChangeText={setReplyDraft}
+        onChangeText={onReplyDraft}
         returnKeyType="send"
         blurOnSubmit={false}
         onSubmitEditing={() => postReply()}

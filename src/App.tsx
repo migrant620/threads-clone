@@ -72,7 +72,18 @@ export default function App() {
   const [liked, setLiked] = React.useState<Record<string, boolean>>({});
   const [followed, setFollowed] = React.useState<Record<string, boolean>>({});
   const [openPostId, setOpenPostId] = React.useState<string | null>(null);
-  const [segments, setSegments] = React.useState<string[]>(['']);
+  const [segmentRows, setSegmentRows] = React.useState([{ id: 'segment-0', text: '' }]);
+  const nextSegmentId = React.useRef(1);
+  const segments = segmentRows.map((row) => row.text);
+  const segmentIds = segmentRows.map((row) => row.id);
+  const resetDraft = () => {
+    const id = `segment-${nextSegmentId.current++}`;
+    setSegmentRows([{ id, text: '' }]);
+    setAudience('Community or topic');
+  };
+  const returnScreens = React.useRef<Screen[]>([]);
+  const [profileTab, setProfileTab] = React.useState('Threads');
+  const [replyDrafts, setReplyDrafts] = React.useState<Record<string, string>>({});
   const [query, setQuery] = React.useState('');
   const [audience, setAudience] = React.useState('Community or topic');
   const [posted, setPosted] = React.useState(false);
@@ -111,6 +122,7 @@ export default function App() {
   }, [screen, restoreAt]);
 
   const openPost = (id: string) => {
+    returnScreens.current.push(screen);
     setOpenPostId(id);
     setScreen('post');
   };
@@ -120,11 +132,22 @@ export default function App() {
     setScreen('feed');
   };
 
+  const backToPrevious = () => {
+    const previous = returnScreens.current.pop() ?? 'feed';
+    if (previous === 'feed') return backToFeed();
+    setScreen(previous);
+  };
+
   const onNavigate = (key: string) => {
+    if (key === 'create' || key === 'search' || key === 'settings') {
+      if (key === screen) return;
+      returnScreens.current.push(screen);
+    } else {
+      returnScreens.current = [];
+    }
     if (key === 'feed') return setScreen('feed');
     if (key === 'messages') return setScreen('messages');
     if (key === 'create') {
-      setSegments((s) => (s.length ? s : ['']));
       setPosted(false);
       return setScreen('create');
     }
@@ -195,7 +218,9 @@ export default function App() {
             replies={thread.replies}
             liked={liked}
             onToggleLike={toggleLike}
-            onBack={backToFeed}
+            onBack={backToPrevious}
+            replyDraft={replyDrafts[openPostId ?? 't0'] ?? ''}
+            onReplyDraft={(value) => setReplyDrafts((drafts) => ({ ...drafts, [openPostId ?? 't0']: value }))}
             followed={!!followed[thread.root.handle]}
             onToggleFollow={() => toggleFollow(thread.root.handle)}
             notificationsOn={notificationsOn}
@@ -208,14 +233,20 @@ export default function App() {
         {screen === 'create' ? (
           <Composer
             segments={segments}
-            onChange={setSegments}
-            onAddSegment={() => setSegments((s) => [...s, ''])}
-            onRemoveSegment={(i) => setSegments((s) => (s.length <= 1 ? s : s.filter((_, j) => j !== i)))}
-            onClose={() => setScreen('feed')}
+            segmentIds={segmentIds}
+            onChange={(next) => setSegmentRows((rows) => rows.map((row, i) => ({ ...row, text: next[i] ?? '' })))}
+            onAddSegment={() => {
+              const id = `segment-${nextSegmentId.current++}`;
+              setSegmentRows((rows) => [...rows, { id, text: '' }]);
+            }}
+            onRemoveSegment={(i) => setSegmentRows((rows) => rows.length === 1 ? [{ ...rows[0], text: '' }] : rows.filter((_, j) => j !== i))}
+            onClose={backToPrevious}
+            onDiscard={() => { resetDraft(); backToPrevious(); }}
             onPost={() => {
               setOwnPosts((s) => [...buildOwnThread(segments, Date.now(), s.length), ...s]);
-              setSegments(['']);
+              resetDraft();
               setPosted(true);
+              returnScreens.current = [];
               setScreen('feed');
             }}
             audience={audience}
@@ -223,12 +254,14 @@ export default function App() {
           />
         ) : null}
 
-        {screen === 'search' ? <SearchScreen query={query} onQuery={setQuery} onBack={backToFeed} onNavigate={onNavigate} followed={followed} onToggleFollow={toggleFollow} /> : null}
+        {screen === 'search' ? <SearchScreen query={query} onQuery={setQuery} onBack={backToPrevious} onNavigate={onNavigate} followed={followed} onToggleFollow={toggleFollow} /> : null}
         {screen === 'activity' ? (
           <ActivityScreen now={now} onNavigate={onNavigate} notificationsOn={notificationsOn} onRequestNotifications={requestNotifications} />
         ) : null}
         {screen === 'profile' ? (
           <ProfileScreen
+            tab={profileTab}
+            onTab={setProfileTab}
             onNavigate={onNavigate}
             followed={followed}
             onToggleFollow={toggleFollow}
@@ -243,7 +276,7 @@ export default function App() {
             onToggleRepost={toggleRepost}
           />
         ) : null}
-        {screen === 'settings' ? <SettingsScreen onBack={() => setScreen('profile')} /> : null}
+        {screen === 'settings' ? <SettingsScreen onBack={backToPrevious} /> : null}
         {screen === 'messages' ? <MessagesScreen onNavigate={onNavigate} onRequestNotifications={requestNotifications} /> : null}
         </React.Suspense>
         <React.Suspense fallback={null}>

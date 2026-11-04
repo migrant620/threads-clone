@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Avatar, TopBar } from './Chrome';
 import { ChevronRightIcon, CircledMoreIcon, CloseIcon, DraftsIcon, GifIcon, ImageIcon, MusicIcon, StickerIcon } from './Icons';
 import { account } from '../data';
@@ -8,10 +8,12 @@ import { colors, connector, fonts, frame, radius, space, type, weight } from '..
 
 type Props = {
   segments: string[];
+  segmentIds: string[];
   onChange: (next: string[]) => void;
   onAddSegment: () => void;
   onRemoveSegment: (index: number) => void;
   onClose: () => void;
+  onDiscard: () => void;
   onPost: () => void;
   posted?: boolean;
   audience: string;
@@ -47,8 +49,29 @@ const CHIP_W = 31;
 
 const SEP = '\ufffd';
 
-export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, onRemoveSegment, onClose, onPost, audience, onAudience }) => {
+export const Composer: React.FC<Props> = ({ segments, segmentIds, onChange, onAddSegment, onRemoveSegment, onClose, onDiscard, onPost, audience, onAudience }) => {
   const [confirming, setConfirming] = React.useState(false);
+  const segmentScroll = React.useRef<ScrollView>(null);
+  const inputs = React.useRef(new Map<string, TextInput>());
+  const previousIds = React.useRef(segmentIds);
+  const lastFocusedId = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    const previous = previousIds.current;
+    const added = segmentIds.find((id) => !previous.includes(id));
+    const removed = previous.find((id) => !segmentIds.includes(id));
+    previousIds.current = segmentIds;
+    const target = added ?? (removed
+      ? lastFocusedId.current && segmentIds.includes(lastFocusedId.current)
+        ? lastFocusedId.current
+        : segmentIds[Math.min(previous.indexOf(removed), segmentIds.length - 1)]
+      : null);
+    if (!target) return;
+    const request = requestAnimationFrame(() => {
+      if (added) segmentScroll.current?.scrollToEnd({ animated: false });
+      inputs.current.get(target)?.focus();
+    });
+    return () => cancelAnimationFrame(request);
+  }, [segmentIds]);
   const multi = segments.length > 1;
   const trimmed = segments.map((s) => s.trim()).filter(Boolean);
   const canPost = trimmed.length > 0;
@@ -67,8 +90,16 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
   const addTop = attachTop + 56;
   const fieldHeight = multi ? 40.4 : 38.9;
 
+  const keyboardProps = {
+    onKeyDownCapture: (event: React.KeyboardEvent) => {
+      if (event.key === 'Enter' && (event.ctrlKey || event.metaKey) && !event.repeat && !event.nativeEvent.isComposing && canPost && !confirming) {
+        event.preventDefault();
+        onPost();
+      }
+    },
+  };
   return (
-    <View style={styles.screen}>
+    <View style={styles.screen} {...keyboardProps}>
       <TopBar
         left="cancel"
         onLeft={requestClose}
@@ -83,13 +114,15 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
 
       <View style={styles.headerRule} pointerEvents="none" />
 
+      <ScrollView ref={segmentScroll} style={styles.segmentScroll} contentContainerStyle={{ minHeight: Math.max(386.9, addTop + 48 - 56) }} keyboardShouldPersistTaps="handled">
+      <View style={{ top: -56 }}>
       {multi ? <View style={[styles.segmentConnector, { top: 56, height: segRow(segments.length - 1).handleTop - 32 }]} /> : null}
 
       {segments.map((text, i) => {
         const row = segRow(i);
         const empty = text.trim().length === 0;
         return (
-          <View key={i}>
+          <View key={segmentIds[i]}>
             <View style={{ position: 'absolute', left: space.avatarLeft, top: row.avatarTop }}>
               <Avatar source={account.avatar} label="m620ui profile photo" />
             </View>
@@ -116,7 +149,9 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
               style={[styles.fieldBox, { top: hintTopFor(i), height: multi ? row.fieldH : 17.5 }]}
             >
               <TextInput
+                ref={(input) => { if (input) inputs.current.set(segmentIds[i], input); else inputs.current.delete(segmentIds[i]); }}
                 accessibilityLabel="Thread text"
+                onFocus={() => { lastFocusedId.current = segmentIds[i]; }}
                 placeholder={multi ? "What's new?" : undefined}
                 value={text}
                 onChangeText={(v) => onChange(segments.map((s, j) => (j === i ? v : s)))}
@@ -155,7 +190,10 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel="Clear"
-                  onPress={() => onRemoveSegment(i)}
+                  onPress={() => {
+                    onRemoveSegment(i);
+                    if (segments.length === 1) requestAnimationFrame(() => inputs.current.get(segmentIds[i])?.focus());
+                  }}
                   style={styles.clearKey}
                 >
                   <CloseIcon size={15} color={colors.secondary} />
@@ -176,6 +214,9 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
       >
         <Text style={[styles.addToThreadText, { color: lastFilled ? colors.secondary : colors.hintLight }]}>Add to thread</Text>
       </Pressable>
+
+      </View>
+      </ScrollView>
 
       <View style={styles.bottomBar}>
         <Pressable accessibilityRole="button" accessibilityLabel="Post options" style={styles.postOptions}>
@@ -200,7 +241,7 @@ export const Composer: React.FC<Props> = ({ segments, onChange, onAddSegment, on
           <View style={styles.dialogCard}>
             <Text style={styles.dialogTitle}>Throw this draft away?</Text>
             <View style={[styles.dialogRule, { top: 82.25 }]} />
-            <Pressable accessibilityRole="button" accessibilityLabel="Discard" onPress={onClose} style={styles.dialogRow}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Discard" onPress={onDiscard} style={styles.dialogRow}>
               <Text style={styles.dialogDiscard}>Discard</Text>
             </Pressable>
             <View style={[styles.dialogRule, { top: 131.364 }]} />
@@ -244,6 +285,7 @@ const DEVICE_PX = 0.36;
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page, width: frame.width, height: frame.height },
+  segmentScroll: { position: 'absolute', left: 0, top: 56, width: frame.width, height: 386.9, transform: 'none' } as never,
   headerRule: { position: 'absolute', left: 0, right: 0, top: 56, height: 1, backgroundColor: colors.hairlineStrong },
   segmentConnector: { position: 'absolute', left: space.avatarLeft + 23, width: connector.width, backgroundColor: colors.border, borderRadius: 1 },
 
