@@ -137,7 +137,7 @@ export const FeedScreen: React.FC<Props> = ({
               index={-1}
               now={now}
               liked={!!liked[p.id]}
-              reposted={false}
+              reposted={!!reposted[p.id]}
               onToggleLike={() => onToggleLike(p.id)}
               onOpen={() => onOpenPost(p.id)}
               onRepostKey={() => setSheet({ kind: 'repost', id: p.id })}

@@ -14,8 +14,11 @@ type Props = {
   onToggleFollow: (handle: string) => void;
   now: number;
   ownPosts: Post[];
-  ownReplies: ReplyNode[];
-  replyContext: Post;
+  ownReplies: Array<ReplyNode & { parentId: string }>;
+  replyContexts: Record<string, Post>;
+  hiddenSuggestions: Record<string, boolean>;
+  onDismissSuggestion: (handle: string) => void;
+  reposted: Record<string, boolean>;
   repostedPosts: Post[];
   liked: Record<string, boolean>;
   onToggleLike: (id: string) => void;
@@ -61,23 +64,37 @@ export const ProfileScreen: React.FC<Props> = ({
   now,
   ownPosts,
   ownReplies,
-  replyContext,
+  replyContexts,
+  hiddenSuggestions,
+  onDismissSuggestion,
+  reposted,
   repostedPosts,
   liked,
   onToggleLike,
   onOpenPost,
   onToggleRepost,
 }) => {
-  const [hidden, setHidden] = React.useState<Record<string, boolean>>({});
-  const visible = suggestions.filter((s) => !hidden[s.handle]);
+  const visible = suggestions.filter((s) => !hiddenSuggestions[s.handle]);
   const [sharing, setSharing] = React.useState(false);
   const [repostSheet, setRepostSheet] = React.useState<string | null>(null);
+  const replyList = React.useMemo(() => {
+    const groups = new Map<string, typeof ownReplies>();
+    for (const reply of ownReplies) {
+      const group = groups.get(reply.parentId) ?? [];
+      group.push(reply);
+      groups.set(reply.parentId, group);
+    }
+    return Array.from(groups, ([parentId, replies]) => {
+      const parent = replyContexts[parentId];
+      return [...(parent ? [parent] : []), ...replies.map(replyAsPost)];
+    }).flat();
+  }, [ownReplies, replyContexts]);
   const list: Post[] =
     tab === 'Threads'
       ? ownPosts
       : tab === 'Replies'
         ? ownReplies.length
-          ? [replyContext, ...ownReplies.map(replyAsPost)]
+          ? replyList
           : []
         : tab === 'Reposts'
           ? repostedPosts
@@ -176,7 +193,7 @@ export const ProfileScreen: React.FC<Props> = ({
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Dismiss action to hide user."
-                    onPress={() => setHidden((h) => ({ ...h, [s.handle]: true }))}
+                    onPress={() => onDismissSuggestion(s.handle)}
                     style={{ position: 'absolute', left: c.dismissX, top: 301.3, width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}
                   >
                     <CloseIcon size={16} color={colors.secondary} />
@@ -246,9 +263,9 @@ export const ProfileScreen: React.FC<Props> = ({
             index={-1}
             now={now}
             liked={!!liked[p.id]}
-            reposted={tab === 'Reposts'}
+            reposted={!!reposted[p.id]}
             onToggleLike={() => onToggleLike(p.id)}
-            onOpen={() => onOpenPost(p.id)}
+            onOpen={() => onOpenPost(tab === 'Replies' ? ownReplies.find((reply) => reply.id === p.id)?.parentId ?? p.id : p.id)}
             onRepostKey={() => setRepostSheet(p.id)}
             onShareKey={() => setSharing(true)}
           />

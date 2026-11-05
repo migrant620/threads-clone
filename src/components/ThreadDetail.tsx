@@ -22,6 +22,10 @@ type Props = {
   onRequestNotifications: () => void;
   added: ReplyNode[];
   onAddReply: (reply: ReplyNode) => void;
+  subscribed: boolean;
+  onToggleSubscription: () => void;
+  expanded: boolean;
+  onToggleExpanded: () => void;
 };
 
 const HEADER = 56;
@@ -123,6 +127,10 @@ const abs = (b: Box) => ({ position: 'absolute' as const, left: b.x, top: b.y, w
 
 const inPlate = (plate: Box, b: Box): Box => ({ x: b.x - plate.x, y: b.y - plate.y, w: b.w, h: b.h });
 
+const BelowBody: React.FC<{ extra: number; children: React.ReactNode }> = ({ extra, children }) => extra > 0
+  ? <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, top: extra, width: frame.width }}>{children}</View>
+  : <>{children}</>;
+
 const RowPlate: React.FC<{ box: Box; label: string; children?: React.ReactNode }> = ({ box, label, children }) => (
   <Pressable accessibilityRole="button" accessibilityLabel={label} style={abs(box)}>
     {children}
@@ -144,19 +152,21 @@ export const ThreadDetail: React.FC<Props> = ({
   onRequestNotifications,
   added,
   onAddReply,
+  subscribed,
+  onToggleSubscription,
+  expanded,
+  onToggleExpanded,
 }) => {
-  const [subscribed, setSubscribed] = React.useState(false);
   const onHeaderKey = (key: string) => {
     if (key !== 'bell') return;
     if (!subscribed && !notificationsOn) onRequestNotifications();
-    setSubscribed((v) => !v);
+    onToggleSubscription();
   };
-  const [expanded, setExpanded] = React.useState(true);
   const postReply = React.useCallback(() => {
     const text = replyDraft.trim();
     if (!text) return;
     onAddReply({
-      id: `local-${now}-${added.length}`,
+      id: `local-${root.id}-${now}-${added.length}`,
       handle: account.handle,
       avatar: account.avatar,
       verified: false,
@@ -168,12 +178,13 @@ export const ThreadDetail: React.FC<Props> = ({
       depth: 0,
     });
     onReplyDraft('');
-  }, [now, replyDraft, added.length, onAddReply, onReplyDraft]);
+  }, [root.id, now, replyDraft, added.length, onAddReply, onReplyDraft]);
 
   const barInput = React.useRef<TextInput>(null);
   const focusReply = React.useCallback(() => barInput.current?.focus(), []);
+  const [bodyHeight, setBodyHeight] = React.useState(0);
+  const bodyExtra = root.id === 't0' ? 0 : Math.max(0, bodyHeight - BODY_LINE * 3);
 
-  const hasAdded = added.length > 0;
   const addedLayout = React.useMemo(() => {
     let acc = BAR_TOP - HEADER;
     const items = added.map((r) => {
@@ -203,7 +214,7 @@ export const ThreadDetail: React.FC<Props> = ({
       onRight={onHeaderKey}
     />
 
-    <ScrollView style={styles.scroll} contentContainerStyle={{ width: frame.width, ...(hasAdded ? { height: BAR_TOP - HEADER + addedLayout.total } : { height: BAR_TOP - HEADER }) }}>
+    <ScrollView style={styles.scroll} contentContainerStyle={{ width: frame.width, height: BAR_TOP - HEADER + addedLayout.total + bodyExtra }}>
       <RowPlate box={T3.root.plate} label={`${root.handle} posted`}>
         <View style={abs(inPlate(T3.root.plate, T3.root.avatar))}>
           <Avatar source={root.avatar} label={`${root.handle} profile photo`} />
@@ -223,7 +234,8 @@ export const ThreadDetail: React.FC<Props> = ({
           <Text style={[styles.followRun, followed ? { color: colors.ink } : null]}>{followed ? 'Following' : 'Follow'}</Text>
         </Pressable>
       </RowPlate>
-      <Text style={[styles.body, { left: T3.root.body.x, top: T3.root.body.y, width: T3.root.body.w }]}>{root.body}</Text>
+      <Text onLayout={(event) => setBodyHeight(event.nativeEvent.layout.height)} style={[styles.body, { left: T3.root.body.x, top: T3.root.body.y, width: T3.root.body.w }]}>{root.body}</Text>
+      <BelowBody extra={bodyExtra}>
       <ActionRow
         likes={root.likes + (liked[root.id] ? 1 : 0)}
         replies={root.replies + added.length}
@@ -236,6 +248,7 @@ export const ThreadDetail: React.FC<Props> = ({
         box={actions.detailRoot}
       />
 
+      {replies.length > 0 ? <>
       <Hairline y={T3.hairline[0]} />
       <Text numberOfLines={1} style={[styles.trendingRun, { left: T3.trending.x, top: T3.trending.y, width: T3.trending.w }]}>
         Trending · Trail survey results · {formatCount(6000)} posts
@@ -330,12 +343,14 @@ export const ThreadDetail: React.FC<Props> = ({
         );
       })}
 
-      <Pressable accessibilityRole="button" accessibilityLabel="Show replies" onPress={() => setExpanded((v) => !v)} style={{ position: 'absolute', left: T3.showReplies.x, top: T3.showReplies.y, width: T3.showReplies.w, height: T3.showReplies.h }}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Show replies" aria-expanded={expanded} onPress={onToggleExpanded} style={{ position: 'absolute', left: T3.showReplies.x, top: T3.showReplies.y, width: T3.showReplies.w, height: T3.showReplies.h }}>
         <Text style={[styles.showRepliesRun, { width: T3.showReplies.w, height: T3.showReplies.h }]}>Show replies</Text>
       </Pressable>
+      </> : null}
       {addedLayout.items.map(({ reply, top, height }) => (
         <PostedReply key={reply.id} reply={reply} now={now} liked={!!liked[reply.id]} onLike={() => onToggleLike(reply.id)} onReply={focusReply} top={top} height={height} />
       ))}
+      </BelowBody>
     </ScrollView>
 
     <Hairline y={T3.bar.separator} />

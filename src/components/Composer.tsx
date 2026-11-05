@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Avatar, TopBar } from './Chrome';
+import { Avatar, TopBar, useModalFocus } from './Chrome';
 import { ChevronRightIcon, CircledMoreIcon, CloseIcon, DraftsIcon, GifIcon, ImageIcon, MusicIcon, StickerIcon } from './Icons';
 import { account } from '../data';
 import { colors, connector, fonts, frame, radius, space, type, weight } from '../tokens';
@@ -51,6 +51,7 @@ const SEP = '\ufffd';
 
 export const Composer: React.FC<Props> = ({ segments, segmentIds, onChange, onAddSegment, onRemoveSegment, onClose, onDiscard, onPost, audience, onAudience }) => {
   const [confirming, setConfirming] = React.useState(false);
+  const confirmationRef = useModalFocus(() => setConfirming(false), confirming);
   const segmentScroll = React.useRef<ScrollView>(null);
   const inputs = React.useRef(new Map<string, TextInput>());
   const previousIds = React.useRef(segmentIds);
@@ -133,11 +134,11 @@ export const Composer: React.FC<Props> = ({ segments, segmentIds, onChange, onAd
 
             {i === 0 ? (
               <>
-                <Pressable accessibilityRole="button" accessibilityLabel="Community or topic" onPress={onAudience} style={styles.audiencePlate}>
+                <Pressable accessibilityRole="button" accessibilityLabel={audience} onPress={onAudience} style={styles.audiencePlate}>
                   <Text style={styles.audienceText}>{audience}</Text>
-                  <Text style={[styles.mergedRun, styles.audienceMergedRun]}>{`m620ui ${SEP}Community or topic`}</Text>
+                  <Text style={[styles.mergedRun, styles.audienceMergedRun]}>{`m620ui ${SEP}${audience}`}</Text>
                 </Pressable>
-                <Pressable accessibilityRole="button" accessibilityLabel="Community or topic" onPress={onAudience} style={styles.chevronKey}>
+                <Pressable accessibilityRole="button" accessibilityLabel={audience} onPress={onAudience} style={styles.chevronKey}>
                   <ChevronRightIcon size={18} color={colors.secondary} />
                 </Pressable>
               </>
@@ -237,7 +238,7 @@ export const Composer: React.FC<Props> = ({ segments, segmentIds, onChange, onAd
       </View>
 
       {confirming ? (
-        <View style={styles.scrim}>
+        <View ref={confirmationRef} role="dialog" aria-modal accessibilityLabel="Throw this draft away?" style={styles.scrim}>
           <View style={styles.dialogCard}>
             <Text style={styles.dialogTitle}>Throw this draft away?</Text>
             <View style={[styles.dialogRule, { top: 82.25 }]} />

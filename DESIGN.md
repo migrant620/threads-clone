@@ -124,9 +124,9 @@ text, and the composer's "Add to thread" before a segment is worth adding. Tinte
 The interface face is **Instrument Sans**, a variable font with a compact, even rhythm that suits a
 dense text feed. Numeric strings use **Roboto Medium**.
 
-Body copy is 15 dp with a 18.3 dp line and −0.2 dp tracking, which keeps long posts compact. The search field and the profile's own name step rise to 16 and
-24 dp; the detail header's "Thread" sits at 17 dp; the smallest captions, tab labels and view counts,
-are 13 dp.
+Feed body copy is 15 dp with an 18.3 dp line and −0.2 dp tracking. The detail body uses a 16.3 dp face
+with a 21.1 dp line; its "Thread" header uses 19.3 dp type. Other screens have their own type sizes,
+with weight and spacing supporting their hierarchy.
 
 Weights are **real stops on the variable axis**, not synthesised bold, which is why the token set
 carries more of them than usual:
@@ -146,9 +146,9 @@ intermediate stops available means the hierarchy gets expressed by weight rather
 
 ## Layout
 
-Everything is laid out on a **393 × 777 dp** frame that does not reflow. The structure is a 60 dp
-text gutter: every post, reply and composer row starts its text at x 60, with a 48 dp avatar plate at
-x 6.2 to its left. A feed row reserves 48 dp for the author line before the body copy begins, and
+The main frame is **393 × 777 dp**. Feed cards and the composer use a 60 dp text gutter, with an
+avatar to its left. The detail page uses a wider root-text column and indented nested replies.
+A feed row reserves 48 dp for the author line before the body copy begins, and
 closes with a four-key action row in 72 dp slots from x 16.
 
 The action keys are the one place where the layout uses fixed per-key boxes rather than a single
@@ -157,7 +157,7 @@ label, and the row's four widths follow that. Detail pages widen the same row to
 column and give it a taller box; replies indent by 34.2 dp per level, which is also the step the
 reply tree's connector uses.
 
-The bottom navigation occupies the last 80 dp. Its plate is `#F5F5F5`, sitting slightly proud of the
+The bottom navigation stays near the frame's lower edge. Its plate is `#F5F5F5`, sitting slightly proud of the
 canvas, and its five keys are centred in it; the selected key is black, the rest `navIdle` (`#A8A8A8`).
 
 ## Elevation & Depth
@@ -200,17 +200,17 @@ without changing how dark it reads.
 stays reachable at its full size while the visible chip remains small. The plate carries the label
 and is not itself interactive.
 
-## Do's and Don'ts
+## Interface behavior
 
-Keep the canvas at `#FCFCFC` and separate content with hairlines; the whitespace is doing the layout
-work. Reach for a heavier weight stop before reaching for a colour. Let the composer's own state drive
-its controls — Post stays `disabled` until a segment has text, and switches on by itself.
+The canvas is `#FCFCFC`, with hairlines between posts and weight changes for hierarchy. Blue marks
+verified accounts and red marks unread activity. Post is disabled while all segments are empty.
 
-Don't add brand colour to chrome: the blue is a verified badge and the red is an unread dot, and
-neither is an accent to be reused. Don't widen the frame — it is a phone app at 393 dp and a wider
-layout is a different product. Don't synthesise bold; the face is variable, so use the axis. And don't
-ship screenshots as UI: every screen here is real components and real local state, with icons drawn as
-inline SVG.
+The first feed card links to the sample reply conversation. Other sample cards and local posts show
+their own text and author. Local replies and drafts belong to their parent conversation; the profile
+shows replies with that context and opens the associated conversation. Subscription selections,
+collapsed replies, follows, dismissed suggestions and reposts remain local to the page session.
+The two audience labels are reflected by both existing controls. The discard card and action sheets
+contain keyboard focus, close with Escape and return focus to the opening control.
 
 ## Responsive Behavior
 
@@ -218,16 +218,15 @@ None, intentionally. The interface is designed for a phone-width column and stay
 column on wider screens rather than stretching, because every box in this document is stated in that
 frame's coordinates.
 
-## Iteration Guide
-
-Change a value in `src/tokens.ts` first and rebuild; tokens are shared across screens, so one change
-moves several. Per-screen geometry lives in each component's own style table.
-
 ## Known Gaps
 
-- Only the first batch is built. Dark theme, the image viewer, repost and quote sheets, the full
-  audience selector, follow-state sync, edit-profile and settings are not in this edition.
+- This is a partial Web prototype. Dark theme, profile editing, feed creation/editing, quote posting,
+  real sharing and a full audience selector remain unavailable. The Media tab has an empty state.
 - Icons are original drawings.
-- The feed is a fixed local set of posts, accounts and artwork; search, filtering and real account
-  data are not modelled, and the composer's Post does not persist anything.
-- Built for the web at 393 dp; native builds are not part of this edition.
+- Posts, accounts and artwork are fictional. Local posting and replies do not use a backend or survive
+  reload. Subscription selections do not schedule notifications; no social-network account is connected.
+- The existing sample conversation defines this edition's reply-tree layout. Other selected text
+  details and long local text demonstrate prototype behavior, without establishing original native
+  screen fidelity for those states.
+- Built for the web at 393 dp; complete App coverage, all-browser compatibility and native Android/iOS
+  acceptance are not established.

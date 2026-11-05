@@ -88,10 +88,12 @@ export default function App() {
   const [audience, setAudience] = React.useState('Community or topic');
   const [posted, setPosted] = React.useState(false);
   const [ownPosts, setOwnPosts] = React.useState<Post[]>([]);
-  const [ownReplies, setOwnReplies] = React.useState<ReplyNode[]>([]);
+  const [ownReplies, setOwnReplies] = React.useState<Array<ReplyNode & { parentId: string }>>([]);
+  const [subscriptions, setSubscriptions] = React.useState<Record<string, boolean>>({});
+  const [collapsedThreads, setCollapsedThreads] = React.useState<Record<string, boolean>>({});
+  const [hiddenSuggestions, setHiddenSuggestions] = React.useState<Record<string, boolean>>({});
   const [reposted, setReposted] = React.useState<Record<string, boolean>>({});
   const toggleRepost = React.useCallback((id: string) => setReposted((s) => ({ ...s, [id]: !s[id] })), []);
-  const addReply = React.useCallback((r: ReplyNode) => setOwnReplies((s) => [...s, r]), []);
   const [askNotifications, setAskNotifications] = React.useState(false);
   const [notificationsOn, setNotificationsOn] = React.useState(false);
   const requestNotifications = React.useCallback(() => setAskNotifications(true), []);
@@ -109,6 +111,13 @@ export default function App() {
 
   const feed = React.useMemo(() => buildFeed(now), [now]);
   const thread = React.useMemo(() => buildThread(now), [now]);
+  const selectedRoot = openPostId === 'p1' || openPostId === null
+    ? thread.root
+    : [...ownPosts, ...feed, thread.root].find((post) => post.id === openPostId) ?? thread.root;
+  const selectedReplies = ownReplies.filter((reply) => reply.parentId === selectedRoot.id);
+  const replyContexts = React.useMemo(() => Object.fromEntries(
+    [thread.root, ...feed, ...ownPosts].map((post) => [post.id, post]),
+  ), [thread, feed, ownPosts]);
 
   const toggleLike = React.useCallback((id: string) => setLiked((s) => ({ ...s, [id]: !s[id] })), []);
 
@@ -213,20 +222,25 @@ export default function App() {
 
         {screen === 'post' ? (
           <ThreadDetail
+            key={selectedRoot.id}
             now={now}
-            root={thread.root}
-            replies={thread.replies}
+            root={selectedRoot}
+            replies={selectedRoot.id === thread.root.id ? thread.replies : []}
             liked={liked}
             onToggleLike={toggleLike}
             onBack={backToPrevious}
-            replyDraft={replyDrafts[openPostId ?? 't0'] ?? ''}
-            onReplyDraft={(value) => setReplyDrafts((drafts) => ({ ...drafts, [openPostId ?? 't0']: value }))}
-            followed={!!followed[thread.root.handle]}
-            onToggleFollow={() => toggleFollow(thread.root.handle)}
+            replyDraft={replyDrafts[selectedRoot.id] ?? ''}
+            onReplyDraft={(value) => setReplyDrafts((drafts) => ({ ...drafts, [selectedRoot.id]: value }))}
+            followed={!!followed[selectedRoot.handle]}
+            onToggleFollow={() => toggleFollow(selectedRoot.handle)}
             notificationsOn={notificationsOn}
             onRequestNotifications={requestNotifications}
-            added={ownReplies}
-            onAddReply={addReply}
+            added={selectedReplies}
+            onAddReply={(reply) => setOwnReplies((rows) => [...rows, { ...reply, parentId: selectedRoot.id }])}
+            subscribed={!!subscriptions[selectedRoot.id]}
+            onToggleSubscription={() => setSubscriptions((rows) => ({ ...rows, [selectedRoot.id]: !rows[selectedRoot.id] }))}
+            expanded={!collapsedThreads[selectedRoot.id]}
+            onToggleExpanded={() => setCollapsedThreads((rows) => ({ ...rows, [selectedRoot.id]: !rows[selectedRoot.id] }))}
           />
         ) : null}
 
@@ -268,8 +282,11 @@ export default function App() {
             now={now}
             ownPosts={ownPosts}
             ownReplies={ownReplies}
-            replyContext={thread.root}
-            repostedPosts={feed.filter((p) => reposted[p.id])}
+            replyContexts={replyContexts}
+            repostedPosts={[...ownPosts, ...feed].filter((p) => reposted[p.id])}
+            hiddenSuggestions={hiddenSuggestions}
+            onDismissSuggestion={(handle) => setHiddenSuggestions((rows) => ({ ...rows, [handle]: true }))}
+            reposted={reposted}
             liked={liked}
             onToggleLike={toggleLike}
             onOpenPost={openPost}

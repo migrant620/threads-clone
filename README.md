@@ -29,7 +29,7 @@ What makes Threads' interface work, and what this recreation had to get right.
 
 **Weight is a real stop on the axis, not synthesised bold.** The face is variable, so the token set carries 400 / 450 / 500 / 550 / 600 / 700 as genuine stops. That matters at 450: several labels are set lighter than a conventional medium, and reaching for 500 there makes the row read bolder than the design intends. Hierarchy is expressed by weight rather than by another grey.
 
-**A 60 dp text gutter, held even in the reply tree.** A 48 dp avatar plate sits at x 6.2 and every post, reply and composer row starts its text at x 60. Replies then indent 34.2 dp per level and are joined by a 2 dp rule, so a long thread still reads as one column of conversation rather than as a stack of nested cards.
+**A clear text column.** Feed cards and the composer use a 60 dp text gutter beside the avatar. The detail page has a wider root-text column, with nested replies indented and joined by a thin connector.
 
 **The Post button turns itself on.** It sits at `#E8E8E8` until a segment carries text and then goes black, with no hint text and no prompt. The same is true of "Add to thread". A state change you can see is worth more than a label telling you what to do next.
 
@@ -46,24 +46,24 @@ The full token set — colours, type scale, spacing, radii and component notes �
 | Area | Things to try |
 |---|---|
 | Feed | Scroll the post list and drag down from the top of the feed to pull-to-refresh. |
-| Post detail | Tap a post to open it with its reply tree; **back** returns you to where you were in the feed. |
+| Post detail | The first sample card opens its linked sample conversation. Other sample and locally posted cards open their own text and author. Replies, reply drafts, subscription selections and collapsed replies remain associated with their conversation for the page session. |
 | Composer | Tap **Create**. The Post pill starts grey — type anything and watch it turn black. **Add to thread** appends a second segment and draws the connector between them; once there is text, **Cancel** asks you to confirm the discard first. |
 | Search | Open the search field for the trending topic and the follow suggestions, then type a query to see results. |
 | Activity | Switch through All / Follows / Conversations / Mentions and scroll past the notification banner. |
-| Profile | See the header, Edit profile and Share profile, then switch between the **Threads**, **Replies** and **Reposts** tabs — each has its own empty state. |
+| Profile | Switch between **Threads**, **Replies** and **Reposts** to see local posts, replies with their parent conversations, and reposted cards. Dismissed account suggestions remain hidden during the session. The Media tab currently has an empty state. |
 | Inbox | Open the **Messages** tab for the inbox with its two category chips and the empty state below. |
-| Login | The invisible 22 dp key in the bottom-right corner of the shell opens the login screen; pressing it again swaps to the remembered-account picker. |
+| Sample login | The invisible 22 dp key in the bottom-right corner of the shell opens the sample login screen; pressing it again swaps to the sample account picker. These screens do not authenticate an account. |
 
 ### A first walkthrough
 
 1. On the feed, scroll down through a few posts, then drag down from the top to refresh.
-2. Tap any post to open its detail page and read the reply tree, then press the back key.
+2. Tap the first sample card to read its linked conversation and reply tree, then press the back key. Open another card to see that card's text and author.
 3. Tap **Create**, type a sentence, and watch the Post pill go from grey to black.
 4. Tap **Add to thread** to add a second segment and see the connector appear.
 5. Tap **Cancel** with text still in the composer — a card asks whether to throw the draft away; **Cancel** keeps it and **Discard** closes the composer.
 6. Tap **Post** — a "Posted" confirmation appears over the feed.
 
-Data is static and local to the page; reloading returns you to the top of the feed.
+Sample data and edits remain local to the page. Reloading clears local posts, replies, reposts, drafts, follows and other selections. The audience control cycles between two local labels; it does not publish to a real audience. The discard card and action sheets support keyboard focus containment, Escape dismissal and focus return.
 
 ## Run locally
 
@@ -87,14 +87,14 @@ The static output is written to `dist/`. Serve that directory over HTTP or HTTPS
 
 ## Demo build
 
-The published demo at <https://migrant620.github.io/threads/> is built from this repository. It was last rebuilt and redeployed on 2026-11-04 (GitHub Pages commit `02f5945e`).
+The published demo at <https://migrant620.github.io/threads/> is built from this repository. It was last rebuilt and redeployed on 2026-11-05 (GitHub Pages commit `1b8a56ab`).
 
 ## Scope and limitations
 
-- **First batch of screens.** This edition covers the feed, a post detail with its reply tree, the composer in three states plus its discard-confirmation card, search landing and results, the activity categories, the profile and its Threads, Replies and Reposts tabs, the Messages inbox, and the login screen. Dark theme, the image viewer, repost and quote sheets, the full audience selector, edit-profile and settings are not built.
+- **Partial prototype.** This edition includes the feed, its photo viewer and feeds panel, local text details, the linked sample reply tree, the composer and discard card, search, activity categories, profile tabs, the Messages empty state, login screens and a settings surface. Dark theme, editing a profile, creating or editing feeds, quote posting, real sharing and a full audience selector remain unavailable. Several secondary controls have no completed flow.
 - **Every account, avatar and post is fictional.** All handles, bios, post text, counts and avatars are original content written for this study. No real person's post, name, likeness or photograph is reproduced, and the avatars are deliberately abstract so that no real person is depicted.
 - **Images are original.** Post images and avatars were generated for this prototype and are not crops, recolourings or derivatives of anything from the Threads app.
-- **Posting does not persist.** The composer is fully interactive, but tapping Post shows a confirmation and discards the draft; there is no backend and no storage.
+- **Session-only interactions.** Posting adds local cards and clears the draft. Replies appear only under their parent conversation; the profile lists those replies with their context. Repost counts and profile membership include local cards. No activity is sent to Threads, and no edits survive a page reload. Subscription selections do not schedule or send notifications.
 - **Icons are redrawn.** The app's own icon face is proprietary, so every icon here is an original vector drawing.
 - **Typeface.** The interface face is Instrument Sans under the SIL Open Font License, bundled locally in `assets/fonts/`. Numeric strings use Roboto Medium under the Apache License 2.0.
 - **Mobile layout on the web.** The interface is designed for a 393 dp phone column; on wider screens it stays centred rather than stretching.
@@ -114,4 +114,4 @@ Product names and trademarks belong to their owners; the license covers this pro
 
 This is an independent prototype by M620, not an official Threads, Instagram or Meta product and not affiliated with or endorsed by Meta Platforms, Inc. Third-party names identify the interface being demonstrated.
 
-Bundled fonts retain their own licenses: Instrument Sans under the SIL Open Font License 1.1, and Roboto Medium under the Apache License 2.0. See the third-party notices in the build output.
+Bundled fonts retain their own licenses: Instrument Sans under the SIL Open Font License 1.1, and Roboto Medium under the Apache License 2.0. See the [third-party notices](https://migrant620.github.io/threads/third-party-notices.txt).

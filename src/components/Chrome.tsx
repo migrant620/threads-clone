@@ -358,8 +358,53 @@ export const ActionRow: React.FC<{
 
 export type SheetRow = { label: string; onPress: () => void };
 
-export const ActionSheet: React.FC<{ title?: string; rows: SheetRow[]; onClose: () => void }> = ({ title, rows, onClose }) => (
-  <View style={styles.sheetScrim} role="dialog" aria-modal accessibilityViewIsModal>
+export function useModalFocus(onClose: () => void, active = true) {
+  const ref = React.useRef<View>(null);
+  const close = React.useRef(onClose);
+  close.current = onClose;
+  React.useEffect(() => {
+    if (!active || typeof document === 'undefined') return;
+    const panel = ref.current as unknown as HTMLElement | null;
+    if (!panel?.querySelectorAll) return;
+    const opener = document.activeElement as HTMLElement | null;
+    const controls = () => Array.from(panel.querySelectorAll<HTMLElement>(
+      'button:not(:disabled),[role="button"][tabindex="0"],input:not(:disabled),textarea:not(:disabled)',
+    )).filter((element) => element.getBoundingClientRect().width > 0 && element.getAttribute('aria-hidden') !== 'true');
+    const first = () => controls().find((element) => element.getAttribute('aria-label') !== 'Dismiss') ?? controls()[0];
+    first()?.focus();
+    const keydown = (event: KeyboardEvent) => {
+      if (event.isComposing) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        close.current();
+      } else if (event.key === 'Tab') {
+        const items = controls();
+        if (!items.length) return;
+        const current = items.indexOf(document.activeElement as HTMLElement);
+        const next = event.shiftKey ? (current <= 0 ? items.length - 1 : current - 1) : (current + 1) % items.length;
+        event.preventDefault();
+        items[next].focus();
+      }
+    };
+    const contain = (event: FocusEvent) => {
+      if (!panel.contains(event.target as Node)) first()?.focus();
+    };
+    document.addEventListener('keydown', keydown, true);
+    document.addEventListener('focusin', contain);
+    return () => {
+      document.removeEventListener('keydown', keydown, true);
+      document.removeEventListener('focusin', contain);
+      if (opener?.isConnected) opener.focus();
+    };
+  }, [active]);
+  return ref;
+}
+
+export const ActionSheet: React.FC<{ title?: string; rows: SheetRow[]; onClose: () => void }> = ({ title, rows, onClose }) => {
+  const modalRef = useModalFocus(onClose);
+  return (
+  <View ref={modalRef} style={styles.sheetScrim} role="dialog" aria-modal accessibilityViewIsModal>
     <Pressable accessibilityRole="button" accessibilityLabel="Dismiss" onPress={onClose} style={styles.sheetBackdrop} />
     <View style={styles.sheetPanel}>
       <View style={styles.sheetGrabber} />
@@ -380,7 +425,8 @@ export const ActionSheet: React.FC<{ title?: string; rows: SheetRow[]; onClose: 
       </Pressable>
     </View>
   </View>
-);
+  );
+};
 
 export const BottomNav: React.FC<{ current: string; onSelect: (key: string) => void; unread?: boolean }> = ({ current, onSelect, unread = true }) => {
   const tabs: Array<{ key: string; label: string; x: number }> = [
