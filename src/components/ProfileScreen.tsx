@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { ActionSheet, Avatar, BottomNav, Verified } from './Chrome';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActionSheet, Avatar, BottomNav, Verified, rovingChoice } from './Chrome';
 import { CloseIcon, InsightsIcon, InstagramMark, PlusIcon, ProfileIcon, SearchIcon, SettingsIcon } from './Icons';
 import { PostCard } from './FeedScreen';
 import { account, suggestions, type Post, type ReplyNode } from '../data';
@@ -76,6 +76,7 @@ export const ProfileScreen: React.FC<Props> = ({
 }) => {
   const visible = suggestions.filter((s) => !hiddenSuggestions[s.handle]);
   const [sharing, setSharing] = React.useState(false);
+  const tabNodes = React.useRef(new Map<number, HTMLElement>());
   const [repostSheet, setRepostSheet] = React.useState<string | null>(null);
   const replyList = React.useMemo(() => {
     const groups = new Map<string, typeof ownReplies>();
@@ -210,6 +211,8 @@ export const ProfileScreen: React.FC<Props> = ({
                 key={t}
                 accessibilityRole="button"
                 accessibilityLabel={t}
+                aria-pressed={on}
+                {...(Platform.OS === 'web' ? { tabIndex: on ? 0 : -1, ref: (node: HTMLElement | null) => { if (node) tabNodes.current.set(i, node); else tabNodes.current.delete(i); }, onKeyDownCapture: (event: React.KeyboardEvent) => rovingChoice(event, i, TABS.length, (next) => onTab(TABS[next]), tabNodes.current) } as object : {})}
                 onPress={() => onTab(t)}
                 style={{ position: 'absolute', left: TAB[i].x, top: 544.38 + TAB[i].dy, width: TAB[i].w, height: 20, justifyContent: 'center' }}
               >

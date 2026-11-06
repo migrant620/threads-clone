@@ -1,12 +1,16 @@
 import * as React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { BottomNav, TopBar, Verified } from './Chrome';
+import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { BottomNav, TopBar, Verified, rovingChoice } from './Chrome';
 import { AccountsNoticeMark, BellIcon, CloseIcon, MoreIcon } from './Icons';
 import { colors, fonts, frame, tracking, weight } from '../tokens';
 import { relativeTime } from '../data';
 
 
 type Props = {
+  tab: string;
+  onTab: (value: string) => void;
+  footerDismissed: boolean;
+  onDismissFooter: () => void;
   now: number;
   onNavigate: (key: string) => void;
   notificationsOn: boolean;
@@ -38,9 +42,9 @@ const RowHairline: React.FC<{ top: number }> = ({ top }) => (
   <View style={[styles.rowHairline, { top }]} />
 );
 
-export const ActivityScreen: React.FC<Props> = ({ now, onNavigate, notificationsOn, onRequestNotifications }) => {
-  const [tab, setTab] = React.useState('All');
-  const [footerDismissed, setFooterDismissed] = React.useState(false);
+export const ActivityScreen: React.FC<Props> = ({ now, onNavigate, notificationsOn, onRequestNotifications, tab, onTab, footerDismissed, onDismissFooter }) => {
+  const categoryNodes = React.useRef(new Map<number, HTMLElement>());
+
   const bannerAge = relativeTime(now - ROW_AGE_MS[0], now);
 
   return (
@@ -53,7 +57,7 @@ export const ActivityScreen: React.FC<Props> = ({ now, onNavigate, notifications
         onRight={onRequestNotifications}
       />
 
-      {CATEGORIES.map((c) => {
+      {CATEGORIES.map((c, index) => {
         const on = tab === c.label;
         return (
           <Pressable
@@ -61,7 +65,9 @@ export const ActivityScreen: React.FC<Props> = ({ now, onNavigate, notifications
             accessibilityRole="button"
             accessibilityLabel={c.label}
             aria-selected={on}
-            onPress={() => setTab(c.label)}
+            aria-pressed={on}
+            {...(Platform.OS === 'web' ? { tabIndex: on ? 0 : -1, ref: (node: HTMLElement | null) => { if (node) categoryNodes.current.set(index, node); else categoryNodes.current.delete(index); }, onKeyDownCapture: (event: React.KeyboardEvent) => rovingChoice(event, index, CATEGORIES.length, (next) => onTab(CATEGORIES[next].label), categoryNodes.current) } as object : {})}
+            onPress={() => onTab(c.label)}
             style={[
               styles.chip,
               { left: c.left, width: c.width },
@@ -125,7 +131,7 @@ export const ActivityScreen: React.FC<Props> = ({ now, onNavigate, notifications
         <Pressable accessibilityRole="button" accessibilityLabel="Turn on" onPress={onRequestNotifications} style={styles.turnOnKey}>
           <Text style={styles.turnOnRun}>Turn on</Text>
         </Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel="" onPress={() => setFooterDismissed(true)} style={styles.dismissKey}>
+        <Pressable accessibilityRole="button" accessibilityLabel="" onPress={onDismissFooter} style={styles.dismissKey}>
           <CloseIcon size={22} color={colors.ink} />
         </Pressable>
       </View>

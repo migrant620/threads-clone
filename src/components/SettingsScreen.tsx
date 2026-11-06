@@ -51,15 +51,37 @@ const GROUPS: Array<{ title: string; rows: Array<{ label: string; chevron?: bool
   },
 ];
 
-export const SettingsScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  const [on, setOn] = React.useState<Record<string, boolean>>({});
+export const SettingsScreen: React.FC<{ onBack: () => void; values: Record<string, boolean>; onToggle: (label: string) => void; scrollOffset: number; onScrollOffset: (y: number) => void }> = ({ onBack, values, onToggle, scrollOffset, onScrollOffset }) => {
+  const scroll = React.useRef<ScrollView>(null);
+  const initialOffset = React.useRef(scrollOffset);
+  const restoring = React.useRef(true);
+  const live = React.useRef(true);
+  const restore = () => {
+    if (!restoring.current || !scroll.current) return;
+    scroll.current.scrollTo({ y: initialOffset.current, animated: false });
+    const node = scroll.current.getScrollableNode?.();
+    if (typeof node?.scrollTop === 'number' && Math.abs(node.scrollTop - initialOffset.current) < 1) restoring.current = false;
+  };
+  React.useLayoutEffect(() => {
+    live.current = true;
+    const node = scroll.current?.getScrollableNode?.();
+    return () => {
+      live.current = false;
+      if (typeof node?.scrollTop === 'number' && (!restoring.current || Math.abs(node.scrollTop - initialOffset.current) < 1)) onScrollOffset(node.scrollTop);
+    };
+  }, [onScrollOffset]);
+  const close = () => {
+    const node = scroll.current?.getScrollableNode?.();
+    if (typeof node?.scrollTop === 'number' && (!restoring.current || Math.abs(node.scrollTop - initialOffset.current) < 1)) onScrollOffset(node.scrollTop);
+    onBack();
+  };
   return (
   <View style={styles.screen}>
     <View style={styles.topBar}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Back"
-        onPress={onBack}
+        onPress={close}
         style={styles.backKey}
       >
         <BackIcon size={24} color={colors.ink} />
@@ -67,7 +89,13 @@ export const SettingsScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => 
       <Text style={styles.title}>Settings</Text>
     </View>
 
-    <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} accessibilityLabel="Settings">
+    <ScrollView ref={scroll} onLayout={restore} onContentSizeChange={restore} scrollEventThrottle={100} onScroll={(event) => {
+      if (!live.current || !scroll.current) return;
+      const node = scroll.current.getScrollableNode?.();
+      const y = typeof node?.scrollTop === 'number' ? node.scrollTop : event.nativeEvent.contentOffset.y;
+      if (restoring.current && Math.abs(y - initialOffset.current) > 1) return;
+      restoring.current = false; onScrollOffset(y);
+    }} style={styles.scroll} showsVerticalScrollIndicator={false} accessibilityLabel="Settings">
       <View style={styles.content}>
         {GROUPS.map(group => (
           <View key={group.title} style={styles.group}>
@@ -75,14 +103,14 @@ export const SettingsScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => 
             <View style={styles.card}>
               {group.rows.map((row, index) => {
                 const toggle = row.chevron === false;
-                const checked = !!on[row.label];
+                const checked = !!values[row.label];
                 return (
                 <Pressable
                   key={row.label}
                   role={toggle ? 'switch' : 'button'}
                   accessibilityLabel={row.label}
                   aria-checked={toggle ? checked : undefined}
-                  onPress={toggle ? () => setOn((s) => ({ ...s, [row.label]: !s[row.label] })) : undefined}
+                  onPress={toggle ? () => onToggle(row.label) : undefined}
                   style={[styles.row, index > 0 && styles.rowDivided]}
                 >
                   <Text style={styles.rowLabel}>{row.label}</Text>

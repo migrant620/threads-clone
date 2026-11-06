@@ -48,9 +48,10 @@ The full token set — colours, type scale, spacing, radii and component notes �
 | Feed | Scroll the post list and drag down from the top of the feed to pull-to-refresh. |
 | Post detail | The first sample card opens its linked sample conversation. Other sample and locally posted cards open their own text and author. Replies, reply drafts, subscription selections and collapsed replies remain associated with their conversation for the page session. |
 | Composer | Tap **Create**. The Post pill starts grey — type anything and watch it turn black. **Add to thread** appends a second segment and draws the connector between them; once there is text, **Cancel** asks you to confirm the discard first. |
-| Search | Open the search field for the trending topic and the follow suggestions, then type a query to see results. |
-| Activity | Switch through All / Follows / Conversations / Mentions and scroll past the notification banner. |
+| Search | Expand the trending rows, type a query, then clear it or leave and return; the expanded list remains. Escape clears a query, then returns to the previous screen. |
+| Activity | Switch through All / Follows / Conversations / Mentions. The selected category and a dismissed notification reminder remain when returning to the page. |
 | Profile | Switch between **Threads**, **Replies** and **Reposts** to see local posts, replies with their parent conversations, and reposted cards. Dismissed account suggestions remain hidden during the session. The Media tab currently has an empty state. |
+| Settings | Switch the six local preferences independently, then leave and reopen Settings. The choices and scroll position remain for the page session. |
 | Inbox | Open the **Messages** tab for the inbox with its two category chips and the empty state below. |
 | Sample login | The invisible 22 dp key in the bottom-right corner of the shell opens the sample login screen; pressing it again swaps to the sample account picker. These screens do not authenticate an account. |
 
@@ -62,6 +63,8 @@ The full token set — colours, type scale, spacing, radii and component notes �
 4. Tap **Add to thread** to add a second segment and see the connector appear.
 5. Tap **Cancel** with text still in the composer — a card asks whether to throw the draft away; **Cancel** keeps it and **Discard** closes the composer.
 6. Tap **Post** — a "Posted" confirmation appears over the feed.
+
+Activity category buttons and Profile section buttons support arrow keys, Home and End to move focus and select. In the main navigation, those keys move focus; Enter or Space activates the button, including Create. After keyboard activation, focus returns to the corresponding navigation button when the new page is ready or the composer closes. Search ignores Ctrl, Meta and Alt Escape and IME composition. The existing photo viewer contains focus, closes with Escape or Back, and returns focus to the exact photo button.
 
 Sample data and edits remain local to the page. Reloading clears local posts, replies, reposts, drafts, follows and other selections. The audience control cycles between two local labels; it does not publish to a real audience. The discard card and action sheets support keyboard focus containment, Escape dismissal and focus return.
 
@@ -87,16 +90,16 @@ The static output is written to `dist/`. Serve that directory over HTTP or HTTPS
 
 ## Demo build
 
-The published demo at <https://migrant620.github.io/threads/> is built from this repository. It was last rebuilt and redeployed on 2026-11-05 (GitHub Pages commit `1b8a56ab`).
+The published demo at <https://migrant620.github.io/threads/> is built from this repository. It was last rebuilt and redeployed on 2026-11-06 (GitHub Pages commit `80b82411`).
 
 ## Scope and limitations
 
 - **Partial prototype.** This edition includes the feed, its photo viewer and feeds panel, local text details, the linked sample reply tree, the composer and discard card, search, activity categories, profile tabs, the Messages empty state, login screens and a settings surface. Dark theme, editing a profile, creating or editing feeds, quote posting, real sharing and a full audience selector remain unavailable. Several secondary controls have no completed flow.
 - **Every account, avatar and post is fictional.** All handles, bios, post text, counts and avatars are original content written for this study. No real person's post, name, likeness or photograph is reproduced, and the avatars are deliberately abstract so that no real person is depicted.
 - **Images are original.** Post images and avatars were generated for this prototype and are not crops, recolourings or derivatives of anything from the Threads app.
-- **Session-only interactions.** Posting adds local cards and clears the draft. Replies appear only under their parent conversation; the profile lists those replies with their context. Repost counts and profile membership include local cards. No activity is sent to Threads, and no edits survive a page reload. Subscription selections do not schedule or send notifications.
+- **Session-only interactions.** Posting adds local cards and clears the draft. Replies appear only under their parent conversation; the profile lists those replies with their context. Repost counts and profile membership include local cards. No activity is sent to Threads, and no edits survive a page reload. Subscription selections do not schedule or send notifications. Settings switches change only this prototype's local presentation; they do not change an account or operating-system settings. Activity and search selections also reset on reload.
 - **Icons are redrawn.** The app's own icon face is proprietary, so every icon here is an original vector drawing.
-- **Typeface.** The interface face is Instrument Sans under the SIL Open Font License, bundled locally in `assets/fonts/`. Numeric strings use Roboto Medium under the Apache License 2.0.
+- **Typeface.** The interface face is Instrument Sans under the SIL Open Font License, bundled locally in `assets/fonts/`. Numeric strings use Roboto Medium under the SIL Open Font License 1.1.
 - **Mobile layout on the web.** The interface is designed for a 393 dp phone column; on wider screens it stays centred rather than stretching.
 - **Validation scope.** The first-batch screens have been checked in Chromium at 393 dp width. This does not establish complete feature coverage, Safari/Firefox compatibility, or native Android/iOS acceptance.
 
@@ -114,4 +117,4 @@ Product names and trademarks belong to their owners; the license covers this pro
 
 This is an independent prototype by M620, not an official Threads, Instagram or Meta product and not affiliated with or endorsed by Meta Platforms, Inc. Third-party names identify the interface being demonstrated.
 
-Bundled fonts retain their own licenses: Instrument Sans under the SIL Open Font License 1.1, and Roboto Medium under the Apache License 2.0. See the [third-party notices](https://migrant620.github.io/threads/third-party-notices.txt).
+Bundled fonts retain their own licenses: Instrument Sans under the SIL Open Font License 1.1, and Roboto Medium under the SIL Open Font License 1.1. See the [third-party notices](https://migrant620.github.io/threads/third-party-notices.txt).

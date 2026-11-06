@@ -9,6 +9,8 @@ import { colors, fonts, frame, type, weight } from '../tokens';
 const SEP = '\ufffd';
 
 type Props = {
+  expanded: boolean;
+  onExpanded: (value: boolean) => void;
   query: string;
   onQuery: (v: string) => void;
   onBack: () => void;
@@ -41,7 +43,7 @@ export const SearchScreen: React.FC<Props> = (props) => {
   const typed = query.trim().length > 0;
   const keyboardProps = {
     onKeyDownCapture: (event: React.KeyboardEvent) => {
-      if (event.key !== 'Escape' || event.nativeEvent.isComposing) return;
+      if (event.key !== 'Escape' || event.isDefaultPrevented() || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229 || event.ctrlKey || event.metaKey || event.altKey) return;
       event.preventDefault();
       if (query) onQuery('');
       else onBack();
@@ -64,8 +66,8 @@ export const SearchScreen: React.FC<Props> = (props) => {
 };
 
 
-const Landing: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed, onToggleFollow }) => {
-  const [expanded, setExpanded] = React.useState(false);
+const Landing: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed, onToggleFollow, expanded, onExpanded }) => {
+
   const rows = expanded ? [...trending, ...moreTrending] : trending;
   const shift = expanded ? moreTrending.length * TREND_PITCH : 0;
   return (
@@ -122,7 +124,7 @@ const Landing: React.FC<Props> = ({ query, onQuery, onBack, onNavigate, followed
 
       {expanded ? null : (
         <>
-          <Pressable accessibilityRole="button" accessibilityLabel="Show more" onPress={() => setExpanded(true)} style={styles.showMoreKey}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Show more" onPress={() => onExpanded(true)} style={styles.showMoreKey}>
             <Text style={styles.showMoreRun}>Show more</Text>
           </Pressable>
           <View style={styles.showMoreChevron} pointerEvents="none">

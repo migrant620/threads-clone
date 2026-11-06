@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { FontDisplay, useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { FeedScreen } from './components/FeedScreen';
+import { NavigationFocusContext } from './components/Chrome';
 import type { LoginVariant } from './components/LoginScreen';
 import { buildFeed, buildOwnThread, buildThread, type Post, type ReplyNode } from './data';
 import { colors, frame } from './tokens';
@@ -83,6 +84,12 @@ export default function App() {
   };
   const returnScreens = React.useRef<Screen[]>([]);
   const [profileTab, setProfileTab] = React.useState('Threads');
+  const [settingsValues, setSettingsValues] = React.useState<Record<string, boolean>>({});
+  const [settingsOffset, setSettingsOffset] = React.useState(0);
+  const [activityTab, setActivityTab] = React.useState('All');
+  const [activityFooterDismissed, setActivityFooterDismissed] = React.useState(false);
+  const [trendsExpanded, setTrendsExpanded] = React.useState(false);
+  const navigationFocus = React.useRef<string | null>(null);
   const [replyDrafts, setReplyDrafts] = React.useState<Record<string, string>>({});
   const [query, setQuery] = React.useState('');
   const [audience, setAudience] = React.useState('Community or topic');
@@ -148,6 +155,7 @@ export default function App() {
   };
 
   const onNavigate = (key: string) => {
+    if (key === screen) { navigationFocus.current = null; return; }
     if (key === 'create' || key === 'search' || key === 'settings') {
       if (key === screen) return;
       returnScreens.current.push(screen);
@@ -176,6 +184,7 @@ export default function App() {
   }
 
   return (
+    <NavigationFocusContext.Provider value={navigationFocus}>
     <View style={styles.shell}>
       <StatusBar style="dark" />
       <View style={styles.frame}>
@@ -268,9 +277,9 @@ export default function App() {
           />
         ) : null}
 
-        {screen === 'search' ? <SearchScreen query={query} onQuery={setQuery} onBack={backToPrevious} onNavigate={onNavigate} followed={followed} onToggleFollow={toggleFollow} /> : null}
+        {screen === 'search' ? <SearchScreen expanded={trendsExpanded} onExpanded={setTrendsExpanded} query={query} onQuery={setQuery} onBack={backToPrevious} onNavigate={onNavigate} followed={followed} onToggleFollow={toggleFollow} /> : null}
         {screen === 'activity' ? (
-          <ActivityScreen now={now} onNavigate={onNavigate} notificationsOn={notificationsOn} onRequestNotifications={requestNotifications} />
+          <ActivityScreen tab={activityTab} onTab={setActivityTab} footerDismissed={activityFooterDismissed} onDismissFooter={() => setActivityFooterDismissed(true)} now={now} onNavigate={onNavigate} notificationsOn={notificationsOn} onRequestNotifications={requestNotifications} />
         ) : null}
         {screen === 'profile' ? (
           <ProfileScreen
@@ -293,7 +302,7 @@ export default function App() {
             onToggleRepost={toggleRepost}
           />
         ) : null}
-        {screen === 'settings' ? <SettingsScreen onBack={backToPrevious} /> : null}
+        {screen === 'settings' ? <SettingsScreen values={settingsValues} onToggle={(label) => setSettingsValues((values) => ({ ...values, [label]: !values[label] }))} scrollOffset={settingsOffset} onScrollOffset={setSettingsOffset} onBack={backToPrevious} /> : null}
         {screen === 'messages' ? <MessagesScreen onNavigate={onNavigate} onRequestNotifications={requestNotifications} /> : null}
         </React.Suspense>
         <React.Suspense fallback={null}>
@@ -328,6 +337,7 @@ export default function App() {
         </Pressable>
       ) : null}
     </View>
+    </NavigationFocusContext.Provider>
   );
 }
 

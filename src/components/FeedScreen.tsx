@@ -54,9 +54,11 @@ export const FeedScreen: React.FC<Props> = ({
   const [sheet, setSheet] = React.useState<{ kind: 'repost' | 'share'; id: string } | null>(null);
   const [feedsOpen, setFeedsOpen] = React.useState(false);
   const [viewing, setViewing] = React.useState<Post['photo'] | null>(null);
+  const mediaOpener = React.useRef<HTMLElement | null>(null);
   const dragged = React.useRef(false);
-  const openPhoto = React.useCallback((src: NonNullable<Post['photo']>) => {
+  const openPhoto = React.useCallback((src: NonNullable<Post['photo']>, opener?: HTMLElement | null) => {
     if (dragged.current || busy.current) return;
+    mediaOpener.current = opener ?? (typeof document !== 'undefined' ? document.activeElement as HTMLElement : null);
     setViewing(src);
   }, []);
 
@@ -189,7 +191,7 @@ export const FeedScreen: React.FC<Props> = ({
       ) : null}
       <React.Suspense fallback={null}>
         {feedsOpen ? <FeedsPanel onClose={() => setFeedsOpen(false)} /> : null}
-        {viewing ? <MediaViewer source={viewing} onClose={() => setViewing(null)} /> : null}
+        {viewing ? <MediaViewer source={viewing} opener={mediaOpener.current} onClose={() => setViewing(null)} /> : null}
       </React.Suspense>
     </View>
   );
@@ -217,7 +219,7 @@ export const PostCard: React.FC<{
   index?: number;
   following?: boolean;
   onFollow?: () => void;
-  onPhoto?: (src: NonNullable<Post['photo']>) => void;
+  onPhoto?: (src: NonNullable<Post['photo']>, opener?: HTMLElement | null) => void;
 }> = ({ post, now, liked, reposted, onToggleLike, onOpen, onRepostKey, onShareKey, index = 0, following = false, onFollow, onPhoto }) => {
   const badge = !!post.suggestFollow && !following;
   const hasMedia = !!(post.photo || post.gallery || post.quote);
@@ -260,7 +262,7 @@ export const PostCard: React.FC<{
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Photo preview"
-            onPress={onPhoto && post.photo ? () => onPhoto(post.photo as NonNullable<Post['photo']>) : undefined}
+            onPress={onPhoto && post.photo ? (event) => onPhoto(post.photo as NonNullable<Post['photo']>, typeof HTMLElement !== 'undefined' && (event.currentTarget as unknown) instanceof HTMLElement ? event.currentTarget as unknown as HTMLElement : null) : undefined}
             style={styles.media}
           >
             <Image source={post.photo} style={styles.mediaImage} resizeMode="cover" />
@@ -322,7 +324,7 @@ const PartPill: React.FC<{ index: number; total: number }> = ({ index, total }) 
   </View>
 );
 
-const Gallery: React.FC<{ photos: Post['gallery']; afterPill: boolean; onPhoto?: (src: NonNullable<Post['photo']>) => void }> = ({
+const Gallery: React.FC<{ photos: Post['gallery']; afterPill: boolean; onPhoto?: (src: NonNullable<Post['photo']>, opener?: HTMLElement | null) => void }> = ({
   photos = [],
   afterPill,
   onPhoto,
@@ -338,7 +340,7 @@ const Gallery: React.FC<{ photos: Post['gallery']; afterPill: boolean; onPhoto?:
         key={i}
         accessibilityRole="button"
         accessibilityLabel="Photo preview"
-        onPress={onPhoto ? () => onPhoto(src) : undefined}
+        onPress={onPhoto ? (event) => onPhoto(src, typeof HTMLElement !== 'undefined' && (event.currentTarget as unknown) instanceof HTMLElement ? event.currentTarget as unknown as HTMLElement : null) : undefined}
         style={[styles.galleryTile, i > 0 ? { marginLeft: 8.1 } : null]}
       >
         <Image source={src} style={styles.mediaImage} resizeMode="cover" />

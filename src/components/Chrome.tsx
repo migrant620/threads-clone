@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   ActivityIcon,
   BackIcon,
@@ -358,7 +358,7 @@ export const ActionRow: React.FC<{
 
 export type SheetRow = { label: string; onPress: () => void };
 
-export function useModalFocus(onClose: () => void, active = true) {
+export function useModalFocus(onClose: () => void, active = true, openerOverride?: HTMLElement | null) {
   const ref = React.useRef<View>(null);
   const close = React.useRef(onClose);
   close.current = onClose;
@@ -366,7 +366,7 @@ export function useModalFocus(onClose: () => void, active = true) {
     if (!active || typeof document === 'undefined') return;
     const panel = ref.current as unknown as HTMLElement | null;
     if (!panel?.querySelectorAll) return;
-    const opener = document.activeElement as HTMLElement | null;
+    const opener = openerOverride ?? document.activeElement as HTMLElement | null;
     const controls = () => Array.from(panel.querySelectorAll<HTMLElement>(
       'button:not(:disabled),[role="button"][tabindex="0"],input:not(:disabled),textarea:not(:disabled)',
     )).filter((element) => element.getBoundingClientRect().width > 0 && element.getAttribute('aria-hidden') !== 'true');
@@ -395,9 +395,9 @@ export function useModalFocus(onClose: () => void, active = true) {
     return () => {
       document.removeEventListener('keydown', keydown, true);
       document.removeEventListener('focusin', contain);
-      if (opener?.isConnected) opener.focus();
+      if (opener?.isConnected) opener.focus(openerOverride ? { preventScroll: true } : undefined);
     };
-  }, [active]);
+  }, [active, openerOverride]);
   return ref;
 }
 
@@ -428,6 +428,15 @@ export const ActionSheet: React.FC<{ title?: string; rows: SheetRow[]; onClose: 
   );
 };
 
+export const NavigationFocusContext = React.createContext<React.MutableRefObject<string | null>>({ current: null });
+
+export function rovingChoice(event: React.KeyboardEvent, index: number, count: number, choose: (next: number) => void, nodes: Map<number, HTMLElement>) {
+  if (event.isDefaultPrevented() || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229 || event.ctrlKey || event.metaKey || event.altKey) return;
+  const next = event.key === 'ArrowRight' ? (index + 1) % count : event.key === 'ArrowLeft' ? (index + count - 1) % count : event.key === 'Home' ? 0 : event.key === 'End' ? count - 1 : -1;
+  if (next < 0) return;
+  event.preventDefault(); choose(next); nodes.get(next)?.focus({ preventScroll: true });
+}
+
 export const BottomNav: React.FC<{ current: string; onSelect: (key: string) => void; unread?: boolean }> = ({ current, onSelect, unread = true }) => {
   const tabs: Array<{ key: string; label: string; x: number }> = [
     { key: 'feed', label: 'Feed', x: 40.4 },
@@ -436,17 +445,36 @@ export const BottomNav: React.FC<{ current: string; onSelect: (key: string) => v
     { key: 'activity', label: 'Activity', x: 256.9 },
     { key: 'profile', label: 'Profile', x: 329.0 },
   ];
+  const pendingFocus = React.useContext(NavigationFocusContext);
+  const nodes = React.useRef(new Map<number, HTMLElement>());
+  const [focusKey, setFocusKey] = React.useState(() => tabs.some((t) => t.key === current) ? current : tabs[0].key);
+  React.useLayoutEffect(() => {
+    if (typeof document === 'undefined' || !pendingFocus.current) return;
+    const index = tabs.findIndex((t) => t.key === pendingFocus.current);
+    const node = nodes.current.get(index);
+    if (node && node.getClientRects().length && node.getBoundingClientRect().width > 0) {
+      setFocusKey(tabs[index].key); node.focus({ preventScroll: true }); pendingFocus.current = null;
+    }
+  }, [current, pendingFocus]);
   const y = 10;
   return (
-    <View style={styles.nav}>
-      {tabs.map((t) => {
+    <View style={styles.nav} role="toolbar" accessibilityLabel="Main navigation" aria-orientation="horizontal">
+      {tabs.map((t, index) => {
         const on = current === t.key;
         return (
           <Pressable
             key={t.key}
             accessibilityRole="button"
             accessibilityLabel={t.label}
-            onPress={() => onSelect(t.key)}
+            aria-pressed={on}
+            {...(Platform.OS === 'web' ? { tabIndex: focusKey === t.key ? 0 : -1, ref: (node: HTMLElement | null) => { if (node) nodes.current.set(index, node); else nodes.current.delete(index); }, onFocus: () => setFocusKey(t.key), onKeyDownCapture: (event: React.KeyboardEvent) => {
+              if (event.isDefaultPrevented() || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229 || event.ctrlKey || event.metaKey || event.altKey) return;
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault(); event.stopPropagation(); pendingFocus.current = t.key; onSelect(t.key); return;
+              }
+              rovingChoice(event, index, tabs.length, (next) => setFocusKey(tabs[next].key), nodes.current);
+            } } as object : {})}
+            onPress={() => { pendingFocus.current = null; onSelect(t.key); }}
             style={{ position: 'absolute', left: t.x, top: y, width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}
           >
             {t.key === 'feed' ? <HomeIcon size={iconSize.nav} filled={on} color={on ? colors.ink : colors.navIdle} /> : null}

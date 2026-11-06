@@ -3,7 +3,7 @@ version: alpha
 name: Threads Android Social Feed
 description: A near-white canvas with a single black ink, a hairline-ruled feed of short text posts, a fixed 393 dp column, and one accent blue reserved for a verified badge. Covers the first batch (home feed, post detail with its reply tree, the composer states, search landing and results, activity categories, profile and its Replies tab, the Messages inbox and the login screen).
 colors:
-  page: "#FCFCFC"
+  page: "#FFFFFF"
   surface: "#FFFFFF"
   ink: "#000000"
   secondary: "#989898"
@@ -103,7 +103,7 @@ restraint and from a very tight type system, not from ornament.
 
 ## Colors
 
-The canvas is `#FCFCFC` — deliberately not pure white — and cards sit on it as `#FFFFFF`. Text is a
+The canvas and card surfaces use `#FFFFFF`. Text uses a
 single `#000000` ink, with `secondary` (`#989898`) carrying times, counts and supporting lines and
 `tertiary` (`#B3B3B3`) stepping the profile's inactive section tabs one notch lighter again.
 Separation is structural: a 1 px `#ECECEC` hairline closes a post, and `#D4D4D4` outlines controls
@@ -202,7 +202,7 @@ and is not itself interactive.
 
 ## Interface behavior
 
-The canvas is `#FCFCFC`, with hairlines between posts and weight changes for hierarchy. Blue marks
+The canvas is `#FFFFFF`, with hairlines between posts and weight changes for hierarchy. Blue marks
 verified accounts and red marks unread activity. Post is disabled while all segments are empty.
 
 The first feed card links to the sample reply conversation. Other sample cards and local posts show
@@ -211,6 +211,17 @@ shows replies with that context and opens the associated conversation. Subscript
 collapsed replies, follows, dismissed suggestions and reposts remain local to the page session.
 The two audience labels are reflected by both existing controls. The discard card and action sheets
 contain keyboard focus, close with Escape and return focus to the opening control.
+
+Settings preferences and its scroll position remain in the page session. Activity retains its selected
+category and a dismissed reminder. Search retains expanded trending rows through query changes and
+navigation. No operating-system or social-network account settings are changed.
+
+Activity and Profile section buttons use arrow keys, Home and End for selection. The main navigation
+uses those keys to move focus, with Enter or Space for activation; Create opens only after activation.
+Keyboard navigation preserves its corresponding button across page changes and composer return.
+Search leaves Ctrl, Meta and Alt Escape and IME composition intact. The local photo viewer supports
+Escape, focus containment and return to the exact opening photo control, without changing its scroll
+position.
 
 ## Responsive Behavior
 
@@ -222,6 +233,7 @@ frame's coordinates.
 
 - This is a partial Web prototype. Dark theme, profile editing, feed creation/editing, quote posting,
   real sharing and a full audience selector remain unavailable. The Media tab has an empty state.
+- The photo viewer is a local presentation; its keyboard behavior does not establish native screen fidelity.
 - Icons are original drawings.
 - Posts, accounts and artwork are fictional. Local posting and replies do not use a backend or survive
   reload. Subscription selections do not schedule notifications; no social-network account is connected.
